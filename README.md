@@ -36,6 +36,7 @@ A modern full-stack Food Ordering Web Application where users can explore food i
 
 * Next.js
 * Tailwind CSS
+* Axios
 
 ### ⚙️ Backend
 
@@ -55,6 +56,7 @@ A modern full-stack Food Ordering Web Application where users can explore food i
 
 ## 📁 Folder Structure
 
+```
 food_order/
 │
 ├── backend/
@@ -75,6 +77,7 @@ food_order/
 ├── frontend/ (Coming Soon)
 │
 └── README.md
+```
 
 ---
 
@@ -82,15 +85,19 @@ food_order/
 
 ### 1️⃣ Clone Repository
 
+```bash
 git clone https://github.com/vaibhavpal7549/food_order.git
 cd food_order
+```
 
 ---
 
 ### 2️⃣ Setup Backend
 
+```bash
 cd backend
 npm install
+```
 
 ---
 
@@ -98,15 +105,19 @@ npm install
 
 Create a `.env` file inside the backend folder and add:
 
+```env
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 PORT=5000
+```
 
 ---
 
 ### 4️⃣ Run Backend Server
 
+```bash
 npm start
+```
 
 Server will run on:
 http://localhost:8000
@@ -117,18 +128,18 @@ http://localhost:8000
 
 ### 🔐 Authentication APIs
 
-POST /api/auth/register → Register User
-POST /api/auth/login → Login User
+* POST `/api/auth/register` → Register User
+* POST `/api/auth/login` → Login User
 
 ### 🍔 Food APIs
 
-GET /api/food → Get all food items
-POST /api/food → Add food item (Admin)
+* GET `/api/food` → Get all food items
+* POST `/api/food` → Add food item (Admin)
 
 ### 📦 Order APIs
 
-POST /api/order → Place order
-GET /api/order/user → Get user orders
+* POST `/api/order` → Place order
+* GET `/api/order/user` → Get user orders
 
 ---
 
