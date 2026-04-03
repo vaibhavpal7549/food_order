@@ -31,3 +31,4 @@ process.on('unhandledRejection', (err) => {
 });
 
 
+//now we can start our server using npm run dev command, which will use nodemon to automatically restart the server whenever we make changes to the code.

@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
     passwordResetToken : String,
     passwordResetExpires : Date,
 },
-{timestamp :true},
+{timestamps : true},
 );
 
 //Hash Password before saving the user
@@ -66,3 +66,24 @@ userSchema.pre('save', async function(){
     this.password = await bcrypt.hash(this.password, 12);
     this.passwordConfirm = undefined;   
 });
+
+
+//CREATE JWT TOKEN
+userSchema.methods.getJWTToken = function(){
+    return jwt.sign({id : this._id}, process.env.JWT_SECRET, {
+        expiresIn : process.env.JWT_EXPIRE,
+    });
+};
+
+//Password compare
+userSchema.methods.correctPassword = async function(
+    candidatePassword,
+    userPassword,
+){
+    return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+
+module.exports = mongoose.model('User', userSchema);
+
+

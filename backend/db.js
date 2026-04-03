@@ -13,12 +13,32 @@ const mongoose = require('mongoose');
 // };
 
 // or we can use another type of connection method
-const connectDB =()=>{
-    mongoose.connect(process.env.MONGO_URI).then((con) =>{
-        console.log(`MongoDB connected with host: ${con.connection.host}`);
-    }).catch((err) => {
-        console.error(`Error connecting to MongoDB: ${err.message}`);
-    });
-}
+
+// For the atlas connection only
+// const connectDB =()=>{
+//     mongoose.connect(process.env.MONGO_URI).then((con) =>{
+//         console.log(`MongoDB connected with host: ${con.connection.host}`);
+//     }).catch((err) => {
+//         console.error(`Error connecting to MongoDB: ${err.message}`);
+//     });
+// }
+
+
+// For the local connection and atlas both
+const connectDB = async () => {
+    try {
+        const dbURI =
+        process.env.NODE_ENV === "production"
+            ? process.env.MONGO_ATLAS_URI
+            : process.env.MONGO_LOCAL_URI;
+
+            await mongoose.connect(dbURI);
+
+            console.log(`MongoDB Connected: ${dbURI}`);
+    } catch (error) {
+        console.error("DB Connection Error:", error);
+        process.exit(1);
+    }
+};
 
 module.exports = connectDB;
