@@ -103,20 +103,6 @@ const orderSchema = mongoose.Schema({
   },
 });
 
-//stock management
-//before saving orders:
-//1. check each food item
-//2. verify stock
-//3. reduce stock
-//4. save order
-//Pre-save middleware
-
-//user places order
-//backend receives order details
-//before saving => check stock
-//reduce stock
-//save order
-//return response to user
 
 orderSchema.pre("save", async function (next) {
   try {

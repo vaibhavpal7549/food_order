@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "cloudinary": "^2.9.0",
-    "cookie-parser": "^1.4.7",
-    "html-to-text": "^9.0.5",
-    "nodemailer": "^8.0.5",
-    "pug": "^3.0.4"
-  }
-}

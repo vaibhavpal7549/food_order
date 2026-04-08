@@ -1,38 +1,44 @@
-//configure express and middleware
-// import packages
-// creates express app
-// configure middleware
-// export the app
-
-
-
-//import express
-const express = require('express');
-//create express application
+const express = require("express");
 const app = express();
+const cookieParser = require("cookie-parser");
+const fileUpload = require("express-fileupload");
+const cors = require("cors");
 
-//import middleware packages
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const authRoutes = require('./routes/auth');
-const errorMiddleware = require('./middlewares/errors');
+const errorMiddleware = require("./middlewares/errors");
 
-//configure middleware
+// Middlewares
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: "30kb" }));
+app.use(express.urlencoded({ extended: true, limit: "30kb" }));
 app.use(cookieParser());
+app.use(fileUpload());
 
-// app.get('/', (req, res) => {
-//     res.send('Server is running!');
-// });
+// Routes
+const foodRouter = require("./routes/foodItem");
+const restaurant = require("./routes/restaurant");
+const menuRouter = require("./routes/menu");
+const order = require("./routes/order");
+const auth = require("./routes/auth");
+const payment = require("./routes/payment");
+const cart = require("./routes/cart");
 
-app.use('/api/user', authRoutes);
+app.use("/api/v1/eats", foodRouter);
+app.use("/api/v1/eats/menus", menuRouter);
+app.use("/api/v1/eats/stores", restaurant);
+app.use("/api/v1/eats/orders", order);
+app.use("/api/v1/users", auth);
+app.use("/api/v1", payment);
+app.use("/api/v1/eats/cart", cart);
 
+// 404 handler
+app.all("*", (req, res) => {
+  res.status(404).json({
+    status: "fail",
+    message: `Can't find ${req.originalUrl} on this server!`,
+  });
+});
+
+// Error middleware
 app.use(errorMiddleware);
 
-
 module.exports = app;
-
-

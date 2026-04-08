@@ -1,34 +1,37 @@
 //start the server
 
+//load env variables
+//start server
 
-//load environment variables from .env file
+//Import app
+const app = require("./app")
+const connectDatabase = require("./db")
+
+//import dotenv
+const dotenv = require("dotenv");
+
+// Handle Uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.log(`ERROR: ${err.stack}`);
+  console.log("Shutting down server due to uncaught exception");
+  process.exit(1);
+});
+
+//Load config
+dotenv.config({ path: "./config/config.env" })
+
+//connect to database
+connectDatabase();
+
 //start the server
 
-//import dotenv to load environment variables
-const dotenv = require('dotenv');
-dotenv.config({path: './config/config.env'});
-
-//import the app
-const app = require('./app');
-
-//start the server
-
-const server = app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT,() =>{
     console.log(`Server is running on port ${process.env.PORT}`);
+})
+
+// Handle Unhandled Promise rejections
+process.on("unhandledRejection", (err) => {
+  console.log(`ERROR: ${err.message}`);
+  console.log("Shutting down server due to Unhandled Promise rejection");
+  server.close(() => process.exit(1));
 });
-
-//connect to the database
-const connectDB = require('./db');
-connectDB(); //connect to the database
-
-//handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-    console.log(`Error: ${err.message}`);
-    console.log('Shutting down the server due to unhandled promise rejection');
-    server.close(() => {
-        process.exit(1);
-    });
-});
-
-
-//now we can start our server using npm run dev command, which will use nodemon to automatically restart the server whenever we make changes to the code.

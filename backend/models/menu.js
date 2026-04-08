@@ -18,7 +18,7 @@ const menuSchema = new mongoose.Schema(
       ref: "Restaurant",
     },
   },
-  { 
+  {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },

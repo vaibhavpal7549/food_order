@@ -73,5 +73,3 @@ restaurantSchema.index({ location: "2dsphere" });
 restaurantSchema.index({ address: "text" });
 
 module.exports = mongoose.model("Restaurant", restaurantSchema);
-
-
