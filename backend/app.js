@@ -14,13 +14,15 @@ const app = express();
 //import middleware packages
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
-const errorMiddleware = require('./middleware/errors');
+const errorMiddleware = require('./middlewares/errors');
 
 //configure middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // app.get('/', (req, res) => {
 //     res.send('Server is running!');

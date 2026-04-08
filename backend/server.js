@@ -4,12 +4,12 @@
 //load environment variables from .env file
 //start the server
 
-//import the app
-const app = require('./app');
-
 //import dotenv to load environment variables
 const dotenv = require('dotenv');
 dotenv.config({path: './config/config.env'});
+
+//import the app
+const app = require('./app');
 
 //start the server
 
