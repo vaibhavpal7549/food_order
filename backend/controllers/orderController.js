@@ -12,13 +12,11 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // Create a new order   =>  /api/v1/order/new
 exports.newOrder = catchAsyncErrors(async (req, res, next) => {
-  // console.log("id", req.body);
   const { session_id } = req.body;
 
   const session = await stripe.checkout.sessions.retrieve(session_id, {
     expand: ["customer"],
   });
-  console.log(session);
   const cart = await Cart.findOne({ user: req.user._id })
     .populate({
       path: "items.foodItem",
@@ -28,7 +26,6 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
       path: "restaurant",
       select: "name",
     });
-  console.log(cart);
 
   let deliveryInfo = {
     address:
@@ -43,7 +40,7 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
   let orderItems = cart.items.map((item) => ({
     name: item.foodItem.name,
     quantity: item.quantity,
-    image: item.foodItem.images[0].url,
+    image: item.foodItem.images?.[0]?.url || "",
     price: item.foodItem.price,
     fooditem: item.foodItem._id,
   }));
@@ -64,7 +61,6 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
     restaurant: cart.restaurant._id,
     paidAt: Date.now(),
   });
-  console.log(order);
 
   await Cart.findOneAndDelete({ user: req.user._id });
 

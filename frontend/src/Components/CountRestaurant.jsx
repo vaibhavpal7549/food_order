@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getRestaurants } from "../redux/actions/restaurantAction";
+import { getRestaurants } from "../redux/actions/restaurantActions";
 import "./css/count.css";
 
 const CountRestaurant = () => {

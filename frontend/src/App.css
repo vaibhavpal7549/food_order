@@ -221,6 +221,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
   z-index: 1000;
 }
 
@@ -230,6 +231,9 @@ footer {
   border-radius: 0.5rem;
   width: 90%;
   max-width: 500px;
+
+  max-height: 70vh;  
+  overflow-y: auto;
 }
 
 .create-content .form-group {

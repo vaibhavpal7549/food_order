@@ -1,9 +1,23 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, Route, Routes } from "react-router-dom";
+import { logout } from "../../redux/actions/userActions";
+
 import Search from "./Search";
 import "../../App.css";
 
 const Header = () => {
+  const dispatch = useDispatch();
+
+  // Updated slice
+  const { user, loading } = useSelector((state) => state.user);
+  const cartCount = useSelector((state) => state.cart.cartItems?.length || 0);
+
+  const logoutHandler = () => {
+    dispatch(logout());
+    window.alert("Logged out successfully");
+  };
+
   return (
     <>
       <nav className="navbar row sticky-top">
@@ -14,31 +28,75 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* search bar and search icon */}
-
+        {/* search */}
         <div className="col-12 col-md-6 mt-2 mt-md-0">
           <Routes>
             <Route path="/" element={<Search />} />
-            <Route path="/eats/stores/search/:keyword" element={<Search />} />
+            <Route
+              path="/eats/stores/search/:keyword"
+              element={<Search />}
+            />
           </Routes>
         </div>
 
-        {/* Login */}
+        {/* right side */}
         <div className="col-12 col-md-3 mt-4 mt-md-0 text-center">
-          {/* ml-> margin left (3unit from left) */}
           <Link to="/cart" style={{ textDecoration: "none" }}>
             <span className="ml-3" id="cart">
               Cart
             </span>
             <span className="ml-1" id="cart_count">
-             2
+              {cartCount}
             </span>
           </Link>
-              <Link to="/users/login" className="material-symbols-outlined web_logo" >  
-           account_circle
+
+          {user ? (
+            <div className="ml-4 dropdown d-inline">
+              <Link
+                to="/"
+                className="btn dropdown-toggle text-white mr-4"
+                id="dropDownMenuButton"
+                data-toggle="dropdown"
+              >
+                <figure className="avatar avatar-nav">
+                  <img
+                    src={user?.avatar?.url || "/images/images.png"}
+                    alt={user?.name}
+                    className="rounded-circle"
+                  />
+                </figure>
+
+                <span>{user?.name}</span>
               </Link>
-            
-         
+
+              <div className="dropdown-menu">
+                <Link
+                  className="dropdown-item"
+                  to="/eats/orders/me/myOrders"
+                >
+                  Orders
+                </Link>
+
+                <Link className="dropdown-item" to="/users/me">
+                  Profile
+                </Link>
+
+                <Link
+                  className="dropdown-item text-danger"
+                  to="/"
+                  onClick={logoutHandler}
+                >
+                  Logout
+                </Link>
+              </div>
+            </div>
+          ) : (
+            !loading && (
+              <Link to="/users/login" className="btn ml-4" id="login_btn">
+                Login
+              </Link>
+            )
+          )}
         </div>
       </nav>
     </>
