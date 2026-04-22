@@ -32,9 +32,11 @@ const connectDB = async () => {
             ? process.env.MONGO_ATLAS_URI
             : process.env.MONGO_LOCAL_URI;
 
-            await mongoose.connect(dbURI);
+            const connection = await mongoose.connect(dbURI);
+            const host = connection.connection.host || "unknown-host";
+            const databaseName = connection.connection.name || "unknown-db";
 
-            console.log(`MongoDB Connected: ${dbURI}`);
+            console.log(`MongoDB Connected: ${host}/${databaseName}`);
     } catch (error) {
         console.error("DB Connection Error:", error);
         process.exit(1);

@@ -5,7 +5,7 @@ import {
   toggleVegOnly,
 } from "../redux/slices/restaurantSlice";
 
-import { createRestaurant, getRestaurants } from "../redux/actions/restaurantAction";
+import { createRestaurant, getRestaurants } from "../redux/actions/restaurantActions";
 import Restaurant from "../Components/Restaurant";
 import Loader from "../Components/layout/Loader";
 import Message from "../Components/Message";

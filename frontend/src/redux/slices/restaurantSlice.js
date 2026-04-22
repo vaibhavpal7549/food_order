@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getRestaurants, createRestaurant,deleteRestaurant, analyzeReviews } from "../actions/restaurantAction";
+import { getRestaurants, createRestaurant,deleteRestaurant, analyzeReviews } from "../actions/restaurantActions";
 
 const initialState = {
     restaurants : [],
