@@ -1,54 +1,43 @@
-const mongoose = require('mongoose');
-// const connectDB = async () => {
-//     try {
-//         await mongoose.connect(process.env.MONGO_URI, {
-//             useNewUrlParser: true,
-//             useUnifiedTopology: true,
-//         });
-//         console.log('MongoDB connected');
-//     } catch (err) {
-//         console.error(err.message);
-//         process.exit(1);
-//     }           
-// };
+const mongoose = require("mongoose");
 
-// or we can use another type of connection method
-
-// For the atlas connection only
-// const connectDB =()=>{
-//     mongoose.connect(process.env.MONGO_URI).then((con) =>{
-//         console.log(`MongoDB connected with host: ${con.connection.host}`);
-//     }).catch((err) => {
-//         console.error(`Error connecting to MongoDB: ${err.message}`);
-//     });
-// }
-
-
-// For the local connection and atlas both
 const connectDB = async () => {
+  const primaryURI = process.env.MONGO_ATLAS_URI || process.env.MONGO_URI;
+  const fallbackURI = process.env.MONGO_LOCAL_URI || "mongodb://127.0.0.1:27017/food_ordering_db";
+
+  if (primaryURI) {
     try {
-        // Prefer Atlas by default so dev/prod both use the same DB,
-        // but keep local as a fallback when Atlas isn't configured.
-        const dbURI =
-            process.env.MONGO_ATLAS_URI ||
-            process.env.MONGO_URI ||
-            process.env.MONGO_LOCAL_URI;
-
-            if (!dbURI) {
-                throw new Error(
-                    "MongoDB URI is missing. Set MONGO_ATLAS_URI (preferred) or MONGO_URI/MONGO_LOCAL_URI."
-                );
-            }
-
-            const connection = await mongoose.connect(dbURI);
-            const host = connection.connection.host || "unknown-host";
-            const databaseName = connection.connection.name || "unknown-db";
-
-            console.log(`MongoDB Connected: ${host}/${databaseName}`);
+      console.log("Connecting to MongoDB Atlas...");
+      const connection = await mongoose.connect(primaryURI, {
+        serverSelectionTimeoutMS: 5000, // 5s timeout for Atlas connection attempts
+      });
+      const host = connection.connection.host || "unknown-host";
+      const databaseName = connection.connection.name || "unknown-db";
+      console.log(`MongoDB Connected (Atlas): ${host}/${databaseName}`);
+      return;
     } catch (error) {
-        console.error("DB Connection Error:", error);
-        process.exit(1);
+      console.warn(
+        `MongoDB Atlas Connection Failed (${error.message}). Attempting fallback to Local MongoDB...`
+      );
     }
+  }
+
+  if (fallbackURI) {
+    try {
+      console.log("Connecting to Local MongoDB...");
+      const connection = await mongoose.connect(fallbackURI, {
+        serverSelectionTimeoutMS: 5000,
+      });
+      const host = connection.connection.host || "127.0.0.1";
+      const databaseName = connection.connection.name || "food_ordering_db";
+      console.log(`MongoDB Connected (Local Fallback): ${host}/${databaseName}`);
+      return;
+    } catch (fallbackError) {
+      console.error("Local MongoDB Connection Error:", fallbackError.message);
+    }
+  }
+
+  console.error("CRITICAL: Failed to connect to both Primary and Fallback MongoDB instances.");
+  process.exit(1);
 };
 
 module.exports = connectDB;
