@@ -11,7 +11,7 @@ const Menu = () => {
   const dispatch = useDispatch();
 
   const { menus, menuId, loading, error, addingItem, addError } = useSelector(
-    (state) => state.menus
+    (state) => state.menu
   );
 
   const { isAuthenticated, user } = useSelector((state) => state.user);

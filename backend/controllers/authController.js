@@ -121,7 +121,7 @@ if (!currentUser) {
     return next(
       new ErrorHandler(
         "User recently changed password ! please log in again.",
-        404
+        401
       )
     );
   }
@@ -291,6 +291,8 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
   res.cookie("jwt", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
+    sameSite: "lax",
+    secure: (process.env.NODE_ENV || "development").toLowerCase() === "production",
   });
 
   res.status(200).json({

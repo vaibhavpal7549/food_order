@@ -10,7 +10,7 @@ const foodSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: [true, "Please enter FoodItem price"],
-    maxLength: [5, "FoodItem name cannot exceed 5 characters "],
+    max: [99999, "FoodItem price cannot exceed 99999"],
     default: 0.0,
   },
   description: {
@@ -41,7 +41,7 @@ const foodSchema = new mongoose.Schema({
   stock: {
     type: Number,
     required: [true, "Please enter foodItem stock"],
-    maxLength: [5, "foodItems can't exceed 5 characters"],
+    max: [99999, "foodItems stock can't exceed 99999"],
     default: 0,
   },
   restaurant: {

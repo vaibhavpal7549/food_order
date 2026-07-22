@@ -19,15 +19,9 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      window.alert("Login successful");
       navigate("/");
     }
-
-    if (error) {
-      window.alert(error);
-      dispatch(clearErrors());
-    }
-  }, [dispatch, isAuthenticated, error, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const submitHandler = (e) => {
     e.preventDefault();

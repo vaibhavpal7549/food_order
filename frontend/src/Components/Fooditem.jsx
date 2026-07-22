@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   addItemToCart,
-  updateCartQuantity,
-  removeItemFromCart,
+  updateCartItemQuantityAction,
+  removeFromCartItem,
 } from "../redux/actions/cartActions";
 import axios from "axios";
 import { getMenus } from "../redux/actions/menuActions";
@@ -46,11 +46,11 @@ const Fooditem = ({ fooditem, restaurant }) => {
       setQuantity(newQuantity);
 
       //params
-      dispatch(updateCartQuantity(fooditem._id, newQuantity));
+      dispatch(updateCartItemQuantityAction(fooditem._id, newQuantity));
     } else {
       setQuantity(0);
       setShowButtons(false);
-      dispatch(removeItemFromCart(fooditem._id));
+      dispatch(removeFromCartItem(fooditem._id));
     }
   };
 
@@ -60,7 +60,7 @@ const Fooditem = ({ fooditem, restaurant }) => {
       const newQuantity = quantity + 1;
       setQuantity(newQuantity);
 
-      dispatch(updateCartQuantity(fooditem._id, newQuantity));
+      dispatch(updateCartItemQuantityAction(fooditem._id, newQuantity));
     } else {
       alert("Exceeded stock limit");
     }
@@ -172,3 +172,4 @@ const Fooditem = ({ fooditem, restaurant }) => {
 };
 
 export default Fooditem;
+

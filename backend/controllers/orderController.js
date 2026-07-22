@@ -14,9 +14,26 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 exports.newOrder = catchAsyncErrors(async (req, res, next) => {
   const { session_id } = req.body;
 
+  if (!session_id) {
+    return next(new ErrorHandler("session_id is required", 400));
+  }
+
   const session = await stripe.checkout.sessions.retrieve(session_id, {
     expand: ["customer"],
   });
+
+  if (!session || session.payment_status !== "paid") {
+    return next(new ErrorHandler("Payment not completed", 400));
+  }
+
+  const existingOrder = await Order.findOne({ "paymentInfo.id": session.payment_intent });
+  if (existingOrder) {
+    return res.status(200).json({
+      success: true,
+      order: existingOrder,
+    });
+  }
+
   const cart = await Cart.findOne({ user: req.user._id })
     .populate({
       path: "items.foodItem",
@@ -27,11 +44,19 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
       select: "name",
     });
 
+  if (!cart || !cart.items?.length || !cart.restaurant) {
+    return next(new ErrorHandler("Cart is empty or invalid", 400));
+  }
+
+  if (!session.shipping_details?.address || !session.customer_details?.phone) {
+    return next(new ErrorHandler("Shipping or phone details missing from checkout session", 400));
+  }
+
   let deliveryInfo = {
     address:
       session.shipping_details.address.line1 +
       " " +
-      session.shipping_details.address.line1,
+      (session.shipping_details.address.line2 || ""),
     city: session.shipping_details.address.city,
     phoneNo: session.customer_details.phone,
     postalCode: session.shipping_details.address.postal_code,
@@ -54,7 +79,7 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
     orderItems,
     deliveryInfo,
     paymentInfo,
-    deliveryCharge: +session.shipping_cost.amount_subtotal / 100,
+    deliveryCharge: +(session.shipping_cost?.amount_subtotal || 0) / 100,
     itemsPrice: +session.amount_subtotal / 100,
     finalTotal: +session.amount_total / 100,
     user: req.user.id,

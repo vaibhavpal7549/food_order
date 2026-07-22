@@ -26,16 +26,12 @@ const Register = () => {
     (state) => state.user
   );
 
-  //useEffect to handle redirection and error alerts
+  //useEffect to handle redirection
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
     }
-    if (error) {
-      window.alert(error);
-      dispatch(clearErrors());
-    }
-  }, [dispatch, isAuthenticated, error, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const submitHandler = (e) => {
   e.preventDefault();

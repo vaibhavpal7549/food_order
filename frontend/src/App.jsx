@@ -16,6 +16,8 @@ import ForgotPassword from './Components/user/ForgotPassword';
 import NewPassword from './Components/user/NewPassword';
 import Cart from './Components/cart/Cart';
 import OrderSuccess from './Components/cart/OrderSuccess';
+import ListOrders from './Components/order/ListOrders';
+import OrderDetails from './Components/order/OrderDetails';
 
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

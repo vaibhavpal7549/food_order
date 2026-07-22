@@ -3,9 +3,19 @@ const FoodItem = require("../models/foodItem");
 const Restaurant = require("../models/restaurant");
 
 async function addItemToCart(req, res) {
-  const { userId, foodItemId, restaurantId, quantity } = req.body;
+  const userId = req.user._id;
+  const { foodItemId, restaurantId, quantity } = req.body;
 
   try {
+    if (!foodItemId || !restaurantId) {
+      return res.status(400).json({ message: "foodItemId and restaurantId are required" });
+    }
+
+    const numericQty = Number(quantity);
+    if (!Number.isInteger(numericQty) || numericQty < 1) {
+      return res.status(400).json({ message: "quantity must be a positive integer" });
+    }
+
     const foodItem = await FoodItem.findById(foodItemId);
     if (!foodItem) {
       return res.status(404).json({ message: "Food item not found" });
@@ -24,23 +34,23 @@ async function addItemToCart(req, res) {
         cart = new Cart({
           user: userId,
           restaurant: restaurantId,
-          items: [{ foodItem: foodItemId, quantity }],
+          items: [{ foodItem: foodItemId, quantity: numericQty }],
         });
       } else {
         const itemIndex = cart.items.findIndex(
           (item) => item.foodItem.toString() === foodItemId
         );
         if (itemIndex > -1) {
-          cart.items[itemIndex].quantity += quantity;
+          cart.items[itemIndex].quantity += numericQty;
         } else {
-          cart.items.push({ foodItem: foodItemId, quantity });
+          cart.items.push({ foodItem: foodItemId, quantity: numericQty });
         }
       }
     } else {
       cart = new Cart({
         user: userId,
         restaurant: restaurantId,
-        items: [{ foodItem: foodItemId, quantity }],
+        items: [{ foodItem: foodItemId, quantity: numericQty }],
       });
     }
 
@@ -66,9 +76,15 @@ async function addItemToCart(req, res) {
 // Update Cart
 
 async function updateCartItemQuantity(req, res) {
-  const { userId, foodItemId, quantity } = req.body;
+  const userId = req.user._id;
+  const { foodItemId, quantity } = req.body;
 
   try {
+    const numericQty = Number(quantity);
+    if (!foodItemId || !Number.isInteger(numericQty) || numericQty < 1) {
+      return res.status(400).json({ message: "foodItemId and a positive integer quantity are required" });
+    }
+
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
@@ -81,7 +97,7 @@ async function updateCartItemQuantity(req, res) {
       return res.status(404).json({ message: "Food item not found in cart" });
     }
 
-    cart.items[itemIndex].quantity = quantity;
+    cart.items[itemIndex].quantity = numericQty;
     await cart.save();
 
     // Fetch and return the populated cart
@@ -106,9 +122,14 @@ async function updateCartItemQuantity(req, res) {
 //Delete cart
 
 async function deleteCartItem(req, res) {
-  const { userId, foodItemId } = req.body;
+  const userId = req.user._id;
+  const { foodItemId } = req.body;
 
   try {
+    if (!foodItemId) {
+      return res.status(400).json({ message: "foodItemId is required" });
+    }
+
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
@@ -150,7 +171,7 @@ async function deleteCartItem(req, res) {
 //Fetch cart Item
 
 async function getCartItem(req, res) {
-  const userId = req.user;
+  const userId = req.user._id;
   try {
     const cart = await Cart.findOne({ user: userId })
       .populate({

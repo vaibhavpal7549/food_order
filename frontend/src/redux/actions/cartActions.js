@@ -41,14 +41,11 @@ export const fetchCart = () => async (dispatch) => {
 };
 
 // add cart items
-export const addItemToCart = (foodItemId, restaurantId, quantity) => async (dispatch, getState) => {
+export const addItemToCart = (foodItemId, restaurantId, quantity) => async (dispatch) => {
     try {
         dispatch(cartRequest());
 
-        const { user } = getState().user;
-
         const { data } = await api.post('/v1/eats/cart/add-to-cart', {
-            userId: user._id,
             foodItemId,
             restaurantId,
             quantity,
@@ -61,14 +58,11 @@ export const addItemToCart = (foodItemId, restaurantId, quantity) => async (disp
 };
 
 // update cart quantity
-export const updateCartItemQuantityAction = (foodItemId, quantity) => async (dispatch, getState) => {
+export const updateCartItemQuantityAction = (foodItemId, quantity) => async (dispatch) => {
     try {
         dispatch(cartRequest());
 
-        const { user } = getState().user;
-
         const { data } = await api.post('/v1/eats/cart/update-cart-item', {
-            userId: user._id,
             foodItemId,
             quantity,
         });
@@ -80,15 +74,12 @@ export const updateCartItemQuantityAction = (foodItemId, quantity) => async (dis
 };
 
 // remove from cart
-export const removeFromCartItem = (foodItemId) => async (dispatch, getState) => {
+export const removeFromCartItem = (foodItemId) => async (dispatch) => {
     try {
         dispatch(cartRequest());
 
-        const { user } = getState().user;
-
         await api.delete('/v1/eats/cart/delete-cart-item', {
             data: {
-                userId: user._id,
                 foodItemId,
             },
         });

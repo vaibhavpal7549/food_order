@@ -18,3 +18,30 @@ export const getMenus = createAsyncThunk(
         }
     }
 );
+
+export const createMenu = createAsyncThunk(
+    'menu/createMenu',
+    async ({ restaurantId, category }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.post(`/v1/eats/stores/${restaurantId}/menus`, { category, restaurant: restaurantId });
+            return data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
+
+export const addItemToMenu = createAsyncThunk(
+    'menu/addItemToMenu',
+    async ({ menuId, category, foodItemId, restaurantId }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.patch(`/v1/eats/stores/${restaurantId}/menus/${menuId}/addItem`, {
+                category,
+                foodItemId,
+            });
+            return data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);

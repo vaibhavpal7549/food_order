@@ -103,6 +103,8 @@ const orderSchema = mongoose.Schema({
   },
 });
 
+orderSchema.index({ "paymentInfo.id": 1 }, { unique: true, sparse: true });
+
 
 orderSchema.pre("save", async function (next) {
   try {

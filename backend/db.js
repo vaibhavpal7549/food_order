@@ -27,10 +27,18 @@ const mongoose = require('mongoose');
 // For the local connection and atlas both
 const connectDB = async () => {
     try {
+        // Prefer Atlas by default so dev/prod both use the same DB,
+        // but keep local as a fallback when Atlas isn't configured.
         const dbURI =
-        process.env.NODE_ENV === "production"
-            ? process.env.MONGO_ATLAS_URI
-            : process.env.MONGO_LOCAL_URI;
+            process.env.MONGO_ATLAS_URI ||
+            process.env.MONGO_URI ||
+            process.env.MONGO_LOCAL_URI;
+
+            if (!dbURI) {
+                throw new Error(
+                    "MongoDB URI is missing. Set MONGO_ATLAS_URI (preferred) or MONGO_URI/MONGO_LOCAL_URI."
+                );
+            }
 
             const connection = await mongoose.connect(dbURI);
             const host = connection.connection.host || "unknown-host";

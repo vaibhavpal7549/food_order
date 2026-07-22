@@ -1,28 +1,53 @@
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
+const FoodItem = require("../models/foodItem");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config/config.env" });
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.processPayment = catchAsyncErrors(async (req, res, next) => {
+  const rawItems = Array.isArray(req.body.items) ? req.body.items : [];
+  if (!rawItems.length) {
+    return res.status(400).json({ message: "Cart items are required" });
+  }
+
+  const line_items = [];
+  for (const item of rawItems) {
+    const foodItemId = item?.foodItem?._id || item?.foodItem;
+    const quantity = Number(item?.quantity);
+
+    if (!foodItemId || !Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ message: "Invalid cart item payload" });
+    }
+
+    const dbFoodItem = await FoodItem.findById(foodItemId).select("name price images stock");
+    if (!dbFoodItem) {
+      return res.status(404).json({ message: `Food item not found: ${foodItemId}` });
+    }
+
+    if (dbFoodItem.stock < quantity) {
+      return res.status(400).json({ message: `Insufficient stock for ${dbFoodItem.name}` });
+    }
+
+    line_items.push({
+      price_data: {
+        currency: "inr",
+        product_data: {
+          name: dbFoodItem.name,
+          images: dbFoodItem.images?.[0]?.url ? [dbFoodItem.images[0].url] : [],
+        },
+        unit_amount: Math.round(Number(dbFoodItem.price) * 100),
+      },
+      quantity,
+    });
+  }
+
   const session = await stripe.checkout.sessions.create({
     customer_email: req.user.email,
     phone_number_collection: {
       enabled: true,
     },
-    line_items: req.body.items.map((item) => ({
-      price_data: {
-        currency: "inr",
-        product_data: {
-          name: item.foodItem.name,
-          images: item.foodItem.images?.[0]?.url
-            ? [item.foodItem.images[0].url]
-            : [],
-        },
-        unit_amount: item.foodItem.price * 100,
-      },
-      quantity: item.quantity,
-    })),
+    line_items,
     mode: "payment",
     shipping_address_collection: {
       allowed_countries: ["US", "IN"],

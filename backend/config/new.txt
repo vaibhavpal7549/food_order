@@ -1,0 +1,114 @@
+Authentication system (Student Portal)
+
+Implement authent Implemented education using express Mongodb and bcrypt
+Post register user Registered any user which hashed password 
+Post a login authenticate user and written a Gwtq token
+Get slash profile protected route to return a user profile data 
+Boost logout invalidate gwt optional can be handled on client side
+
+
+
+
+// server.js
+
+const express = require("express");
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const app = express();
+app.use(express.json());
+
+// ====== CONFIG ======
+const JWT_SECRET = "your_jwt_secret_key";
+const MONGO_URI = "mongodb://127.0.0.1:27017/student_portal";
+
+// ====== DB CONNECT ======
+mongoose.connect(MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
+
+// ====== USER MODEL ======
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: { type: String, unique: true },
+  password: String
+});
+
+const User = mongoose.model("User", userSchema);
+
+
+// ====== AUTH MIDDLEWARE ======
+const authMiddleware = async (req, res, next) => {
+  const token = req.header("Authorization");
+
+  if (!token) return res.status(401).json({ msg: "No token" });
+
+  try {
+    const decoded = jwt.verify(token.replace("Bearer ", ""), JWT_SECRET);
+    req.user = decoded.id;
+    next();
+  } catch (err) {
+    res.status(401).json({ msg: "Invalid token" });
+  }
+};
+
+// ====== REGISTER ======
+app.post("/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    let user = await User.findOne({ email });
+    if (user) return res.status(400).json({ msg: "User exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user = new User({
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    await user.save();
+
+    res.json({ msg: "User registered" });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ====== LOGIN ======
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
+
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+      expiresIn: "1d"
+    });
+
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ====== PROFILE (PROTECTED) ======
+app.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user).select("-password");
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ====== LOGOUT ======
+// (JWT logout handled on client side by removing token)
+
+app.listen(5000, () => console.log("Server running on port 5000"));

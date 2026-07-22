@@ -33,11 +33,8 @@ const Home = () => {
   } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (restaurantsError) {
-      return alert.error(restaurantsError);
-    }
     dispatch(getRestaurants(keyword));
-  }, [dispatch, restaurantsError, keyword]);
+  }, [dispatch, keyword]);
 
   const handleSortByRatings = () => {
     dispatch(sortByRatings());

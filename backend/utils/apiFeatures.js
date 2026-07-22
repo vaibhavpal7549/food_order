@@ -55,6 +55,7 @@ class APIFeatures {
     // Check if sortBy is specified in the query parameters
     if (this.queryStr.sortBy) {
       const sortBy = this.queryStr.sortBy.toLowerCase();
+      let sortQuery = {}; // FIX: declare before use (was missing, caused ReferenceError)
 
       // Sort by ratings (highest to lowest)
       if (sortBy === "ratings") {
@@ -64,10 +65,10 @@ class APIFeatures {
       else if (sortBy === "reviews") {
         sortQuery = { numOfReviews: -1 };
       }
-    }
 
-    // Apply the sorting query to the APIFeatures
-    this.query = this.query.sort(sortQuery);
+      // Apply the sorting query to the APIFeatures
+      this.query = this.query.sort(sortQuery);
+    }
 
     //db.sar.find({“Last_Name”:{$gte:“C”}})
     //this.query = this.query.find({ 'queryStr.price': { $gte: '900' } });

@@ -5,6 +5,7 @@ import { deleteRestaurant } from "../redux/actions/restaurantActions";
 
 const Restaurant = ({ restaurant }) => {
   const dispatch = useDispatch();
+  const [imageError, setImageError] = useState(false);
 
   const { isAuthenticated, user } = useSelector(
     (state) => state.user || {}
@@ -19,14 +20,19 @@ const Restaurant = ({ restaurant }) => {
     });
   };
 
+  const imageUrl = restaurant?.images?.[0]?.url;
+  const displayImage = imageError || !imageUrl ? "/images/template.jpeg" : imageUrl;
+
   return (
     <div className="col-sm-12 col-md-6 col-lg-3 my-3">
       <div className="card p-3 rounded">
         <Link to={`/eats/stores/${restaurant._id}/menus`}>
           <img
             className="card-img-top mx-auto"
-            src={restaurant.images?.[0]?.url}
+            src={displayImage}
+            onError={() => setImageError(true)}
             alt={restaurant.name}
+            style={{ height: "200px", objectFit: "cover" }}
           />
         </Link>
 
