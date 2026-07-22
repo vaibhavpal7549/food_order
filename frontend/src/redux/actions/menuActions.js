@@ -6,13 +6,19 @@ export const getMenus = createAsyncThunk(
     async (storeId, { rejectWithValue }) => {
         try {
             const { data } = await api.get(`/v1/eats/stores/${storeId}/menus`);
-            const menuGroups = data.data?.[0]?.menu || [];
+            const menuDocument = data.data?.[0] || null;
+            const menuGroups = menuDocument?.menu || [];
 
-            return menuGroups.map((group, index) => ({
-                _id: `${group.category || 'category'}-${index}`,
-                category: group.category || 'Uncategorized',
-                items: group.items || [],
-            }));
+            return {
+                // FIX BUG-07: include the real Menu document _id so addItemToMenu
+                // has a valid MongoDB ObjectId for the PATCH endpoint.
+                menuDocumentId: menuDocument?._id || null,
+                menus: menuGroups.map((group, index) => ({
+                    _id: `${group.category || 'category'}-${index}`,
+                    category: group.category || 'Uncategorized',
+                    items: group.items || [],
+                })),
+            };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -23,7 +29,12 @@ export const createMenu = createAsyncThunk(
     'menu/createMenu',
     async ({ restaurantId, category }, { rejectWithValue }) => {
         try {
-            const { data } = await api.post(`/v1/eats/stores/${restaurantId}/menus`, { category, restaurant: restaurantId });
+            // FIX BUG-19: Schema is { menu: [{ category, items }], restaurant }
+            // Was sending { category, restaurant } at top level — wrong shape.
+            const { data } = await api.post(`/v1/eats/stores/${restaurantId}/menus`, {
+                menu: [{ category, items: [] }],
+                restaurant: restaurantId,
+            });
             return data.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);

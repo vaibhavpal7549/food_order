@@ -27,7 +27,6 @@ const Home = () => {
   } = useSelector((state) => state.restaurants);
 
   const {
-    loading: authLoading,
     isAuthenticated,
     user,
   } = useSelector((state) => state.user);

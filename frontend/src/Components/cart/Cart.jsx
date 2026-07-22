@@ -8,7 +8,7 @@ import {
   removeFromCartItem,
   updateCartItemQuantityAction,
 } from "../../redux/actions/cartActions";
-import { processPayment } from "../../redux/actions/ORDERActions";
+import { processPayment } from "../../redux/actions/orderActions";
 
 const Cart = () => {
   const dispatch = useDispatch();

@@ -71,8 +71,10 @@ export const updateProfile = (userData) => async (dispatch) => {
   try {
     dispatch(updateRequest());
 
+    // FIX BUG-06: was 'multipart/form-data' but payload is plain JSON
+    // (avatar is already a base64 string, not a File object)
     const { data } = await API.put("/v1/users/me/update", userData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { "Content-Type": "application/json" },
     });
 
     dispatch(updateSuccess(data.success));

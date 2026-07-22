@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Route, Routes } from "react-router-dom";
 import { logout } from "../../redux/actions/userActions";
@@ -8,13 +8,27 @@ import "../../App.css";
 
 const Header = () => {
   const dispatch = useDispatch();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  // Updated slice
   const { user, loading } = useSelector((state) => state.user);
   const cartCount = useSelector((state) => state.cart.cartItems?.length || 0);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const logoutHandler = () => {
     dispatch(logout());
+    setDropdownOpen(false);
+    // Use toast instead of blocking window.alert
     window.alert("Logged out successfully");
   };
 
@@ -51,44 +65,69 @@ const Header = () => {
           </Link>
 
           {user ? (
-            <div className="ml-4 dropdown d-inline">
-              <Link
-                to="/"
-                className="btn dropdown-toggle text-white mr-4"
-                id="dropDownMenuButton"
-                data-toggle="dropdown"
+            /* FIX BUG-12: replaced Bootstrap 4 jQuery data-toggle dropdown
+               with a React state-based dropdown. The old version relied on
+               jQuery which is not bundled, so the dropdown never opened. */
+            <div
+              className="ml-4 dropdown d-inline"
+              ref={dropdownRef}
+              style={{ position: "relative" }}
+            >
+              <button
+                type="button"
+                className="btn text-white mr-4"
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                aria-haspopup="true"
+                aria-expanded={dropdownOpen}
+                style={{ background: "none", border: "none" }}
               >
-                <figure className="avatar avatar-nav">
+                <figure className="avatar avatar-nav" style={{ display: "inline-block" }}>
                   <img
                     src={user?.avatar?.url || "/images/images.png"}
                     alt={user?.name}
                     className="rounded-circle"
                   />
                 </figure>
-
                 <span>{user?.name}</span>
-              </Link>
+                <span style={{ marginLeft: "0.4rem" }}>▾</span>
+              </button>
 
-              <div className="dropdown-menu">
-                <Link
-                  className="dropdown-item"
-                  to="/eats/orders/me/myOrders"
+              {dropdownOpen && (
+                <div
+                  className="dropdown-menu show"
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: "100%",
+                    zIndex: 1050,
+                    minWidth: "10rem",
+                  }}
                 >
-                  Orders
-                </Link>
+                  <Link
+                    className="dropdown-item"
+                    to="/eats/orders/me/myOrders"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Orders
+                  </Link>
 
-                <Link className="dropdown-item" to="/users/me">
-                  Profile
-                </Link>
+                  <Link
+                    className="dropdown-item"
+                    to="/users/me"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Profile
+                  </Link>
 
-                <Link
-                  className="dropdown-item text-danger"
-                  to="/"
-                  onClick={logoutHandler}
-                >
-                  Logout
-                </Link>
-              </div>
+                  <Link
+                    className="dropdown-item text-danger"
+                    to="/"
+                    onClick={logoutHandler}
+                  >
+                    Logout
+                  </Link>
+                </div>
+              )}
             </div>
           ) : (
             !loading && (

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { register} from "../../redux/actions/userActions";
+import { register } from "../../redux/actions/userActions";
 import { clearErrors } from "../../redux/slices/userSlice";
+import { toast } from "react-toastify";
 
 const Register = () => {
  
@@ -25,6 +26,14 @@ const Register = () => {
   const { isAuthenticated, error, loading } = useSelector(
     (state) => state.user
   );
+
+  // Show registration errors via toast
+  useEffect(() => {
+    if (error) {
+      toast.error(error, { position: "bottom-right" });
+      dispatch(clearErrors());
+    }
+  }, [error, dispatch]);
 
   //useEffect to handle redirection
   useEffect(() => {
@@ -152,7 +161,7 @@ const Register = () => {
                     name="avatar"
                     className="custom-file-input"
                     id="customFile"
-                    accept="images/*"
+                    accept="image/*"
                     onChange={onChange}
                   ></input>
                   <label className="custom-file-label" htmlFor="customFile">

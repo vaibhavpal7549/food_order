@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import { getMenus, addItemToMenu, createMenu } from "../redux/actions/menuActions"; // ✅ FIXED IMPORT
+import { getMenus, addItemToMenu, createMenu } from "../redux/actions/menuActions";
 import { getRestaurants } from "../redux/actions/restaurantActions";
 import Fooditem from "./Fooditem";
 import axios from "axios";
@@ -10,7 +10,8 @@ const Menu = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const { menus, menuId, loading, error, addingItem, addError } = useSelector(
+  // FIX BUG-07: use menuDocumentId (real MongoDB _id) instead of menuId (was undefined)
+  const { menus, menuDocumentId, loading, error, addingItem, addError } = useSelector(
     (state) => state.menu
   );
 
@@ -20,8 +21,6 @@ const Menu = () => {
   const [newMenuCategory, setNewMenuCategory] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [itemToAdd, setItemToAdd] = useState({ category: "", foodItemId: "" });
-  const [availableItems, setAvailableItems] = useState([]);
-  const [creatingFood, setCreatingFood] = useState(false);
 
   const [newFood, setNewFood] = useState({
     name: "",
@@ -36,17 +35,6 @@ const Menu = () => {
     dispatch(getRestaurants());
   }, [dispatch, id]);
 
-  // fetch food items
-  const fetchItems = async () => {
-    try {
-      const { data } = await axios.get(`/api/v1/eats/items/${id}`);
-      setAvailableItems(data.data);
-    } catch (err) {
-      console.error("failed to load items", err);
-    }
-  };
-
-  // ✅ FIXED createMenu
   const submitMenuCreation = async (e) => {
     e.preventDefault();
     if (!newMenuCategory) return;
@@ -56,7 +44,7 @@ const Menu = () => {
     );
 
     if (createMenu.fulfilled.match(result)) {
-      dispatch(getMenus(id)); // optional refresh
+      dispatch(getMenus(id));
       setShowMenuCreate(false);
       setNewMenuCategory("");
     }
@@ -79,10 +67,8 @@ const Menu = () => {
 
       const created = data.data;
 
-      setAvailableItems((prev) => [...prev, created]);
       setItemToAdd({ ...itemToAdd, foodItemId: created._id });
 
-      setCreatingFood(false);
       setNewFood({
         name: "",
         price: "",
@@ -111,7 +97,7 @@ const Menu = () => {
             if (!window.confirm("Delete this menu category?")) return;
             try {
               await axios.delete(
-                `/api/v1/eats/stores/${id}/menus/${menu._id}`,
+                `/api/v1/eats/stores/${id}/menus/${menuDocumentId}`,
                 {
                   withCredentials: true,
                 }
@@ -137,7 +123,6 @@ const Menu = () => {
                           category: menu.category,
                           foodItemId: "",
                         });
-                        fetchItems();
                         setShowAddModal(true);
                       }}
                     >
@@ -236,15 +221,17 @@ const Menu = () => {
                 const created = await submitNewFood(e);
 
                 if (created && created._id) {
+                  // FIX BUG-07: use menuDocumentId (real MongoDB _id) instead of
+                  // the synthetic `menuId` which was always undefined.
                   dispatch(
                     addItemToMenu({
-                      menuId,
+                      menuId: menuDocumentId,
                       category: itemToAdd.category,
                       foodItemId: created._id,
                       restaurantId: id,
                     })
                   ).then(() => {
-                    dispatch(getMenus(id)); // optional refresh
+                    dispatch(getMenus(id));
                     setShowAddModal(false);
                   });
                 }
@@ -366,8 +353,8 @@ const Menu = () => {
                 />
               </div>
 
-              <button className="btn btn-primary" type="submit">
-                Add
+              <button className="btn btn-primary" type="submit" disabled={addingItem}>
+                {addingItem ? "Adding..." : "Add"}
               </button>
 
               <button

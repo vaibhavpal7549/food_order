@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder } from "../../redux/actions/ORDERActions";
+import { createOrder } from "../../redux/actions/orderActions";
 import { clearErrors } from "../../redux/slices/orderSlice";
 import { toast } from "react-toastify";
 

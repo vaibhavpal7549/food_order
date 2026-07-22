@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faIndianRupeeSign } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,8 +12,6 @@ import axios from "axios";
 import { getMenus } from "../redux/actions/menuActions";
 
 const Fooditem = ({ fooditem, restaurant }) => {
-  const [quantity, setQuantity] = useState(1);
-  const [showButtons, setShowButtons] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -25,31 +23,19 @@ const Fooditem = ({ fooditem, restaurant }) => {
   //cart from slice
   const { cartItems } = useSelector((state) => state.cart);
 
-  useEffect(() => {
-    const cartItem = cartItems.find(
-      (item) => item.foodItem._id === fooditem._id
-    );
-
-    if (cartItem) {
-      setQuantity(cartItem.quantity);
-      setShowButtons(true);
-    } else {
-      setQuantity(1);
-      setShowButtons(false);
-    }
-  }, [cartItems, fooditem]);
+  // Derive quantity and showButtons from cart state instead of using an effect
+  // FIX: was calling setState() synchronously inside an effect (lint error)
+  const cartItem = cartItems.find((item) => item.foodItem._id === fooditem._id);
+  const quantity = cartItem ? cartItem.quantity : 1;
+  const showButtons = !!cartItem;
 
   // ➖ decrease
   const decreaseQty = () => {
     if (quantity > 1) {
       const newQuantity = quantity - 1;
-      setQuantity(newQuantity);
-
-      //params
+      // Redux update re-derives quantity from cart state
       dispatch(updateCartItemQuantityAction(fooditem._id, newQuantity));
     } else {
-      setQuantity(0);
-      setShowButtons(false);
       dispatch(removeFromCartItem(fooditem._id));
     }
   };
@@ -58,8 +44,6 @@ const Fooditem = ({ fooditem, restaurant }) => {
   const increaseQty = () => {
     if (quantity < fooditem.stock) {
       const newQuantity = quantity + 1;
-      setQuantity(newQuantity);
-
       dispatch(updateCartItemQuantityAction(fooditem._id, newQuantity));
     } else {
       alert("Exceeded stock limit");
@@ -71,9 +55,7 @@ const Fooditem = ({ fooditem, restaurant }) => {
     if (!isAuthenticated) {
       return navigate("/users/login");
     }
-
     dispatch(addItemToCart(fooditem._id, restaurant, quantity));
-    setShowButtons(true);
   };
 
   return (
