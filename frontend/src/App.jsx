@@ -35,21 +35,25 @@ function App() {
           <Header />
           <div className='container container-fluids'>
             <Routes>
-              <Route path='/' element={<Home />} exact />
-              <Route path="/eats/stores/search/:keyword" element={<Home />} exact />
-            
-            {/* login */}
-              <Route path='/users/login' element={<Login />} exact />
-              <Route path='/users/signup' element={<Register />} exact />
-              <Route path='/users/me' element={<Profile />} exact />
-              <Route path='/users/me/update' element={<UpdateProfile />} exact />
-              <Route path='/users/forgetPassword' element={<ForgotPassword />} exact />
-              <Route path='/users/resetPassword/:token' element={<NewPassword />} exact />
+              <Route path="/" element={<Home />} />
+              <Route path="/eats/stores/search/:keyword" element={<Home />} />
 
-              <Route path="/eats/stores/:id" element={<Menu />} exact />
-              <Route path="/eats/stores/:id/menus" element={<Menu />} exact />
-              <Route path="/cart" element={<Cart />} exact />
-              <Route path="/success" element={<OrderSuccess />} exact />
+            {/* login */}
+              <Route path='/users/login' element={<Login />} />
+              <Route path='/users/signup' element={<Register />} />
+              <Route path='/users/me' element={<Profile />} />
+              <Route path='/users/me/update' element={<UpdateProfile />} />
+              <Route path='/users/forgetPassword' element={<ForgotPassword />} />
+              <Route path='/users/resetPassword/:token' element={<NewPassword />} />
+
+              <Route path="/eats/stores/:id" element={<Menu />} />
+              <Route path="/eats/stores/:id/menus" element={<Menu />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/success" element={<OrderSuccess />} />
+
+              {/* Order routes — were missing, causing blank pages */}
+              <Route path="/eats/orders/me/myOrders" element={<ListOrders />} />
+              <Route path="/eats/orders/:id" element={<OrderDetails />} />
             </Routes>
           </div>
         </div>
