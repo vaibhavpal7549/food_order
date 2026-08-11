@@ -9,7 +9,7 @@ const sendToken = (user, statusCode, res) => {
       Date.now() + process.env.JWT_EXPIRES_TIME * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     // Only send over HTTPS in production; allow HTTP in development
     secure: (process.env.NODE_ENV || "development").toLowerCase() === "production",
   };

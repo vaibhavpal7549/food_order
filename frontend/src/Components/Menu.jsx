@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { getMenus, addItemToMenu, createMenu } from "../redux/actions/menuActions";
 import { getRestaurants } from "../redux/actions/restaurantActions";
 import Fooditem from "./Fooditem";
-import axios from "axios";
+import api from "../utils/api";
 
 const Menu = () => {
   const { id } = useParams();
@@ -60,10 +60,7 @@ const Menu = () => {
         restaurant: id,
       };
 
-      const { data } = await axios.post("/api/v1/eats/item", payload, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
+      const { data } = await api.post("/v1/eats/item", payload);
 
       const created = data.data;
 
@@ -96,11 +93,8 @@ const Menu = () => {
           const deleteMenu = async () => {
             if (!window.confirm("Delete this menu category?")) return;
             try {
-              await axios.delete(
-                `/api/v1/eats/stores/${id}/menus/${menuDocumentId}`,
-                {
-                  withCredentials: true,
-                }
+              await api.delete(
+                `/v1/eats/stores/${id}/menus/${menuDocumentId}`
               );
               dispatch(getMenus(id));
             } catch (err) {
@@ -306,15 +300,14 @@ const Menu = () => {
                     if (!newFood.name) return alert("Enter name first");
 
                     try {
-                      const { data } = await axios.post(
-                        "/api/v1/ai/generate-food-ai",
+                      const { data } = await api.post(
+                        "/v1/ai/generate-food-ai",
                         {
                           name: newFood.name,
                           category: itemToAdd.category || "",
                           spiceLevel: "Medium",
                           price: newFood.price || 0,
-                        },
-                        { withCredentials: true }
+                        }
                       );
 
                       setNewFood({

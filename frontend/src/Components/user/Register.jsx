@@ -46,7 +46,7 @@ const Register = () => {
   e.preventDefault();
 
   if (password !== passwordConfirm) {
-    alert("Passwords do not match");
+    toast.error("Passwords do not match", { position: "bottom-right" });
     return;
   }
 

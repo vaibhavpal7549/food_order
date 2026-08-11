@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const cartSchema = new Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   restaurant: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Restaurant",
-    required: false,
+    required: true,
   },
   items: [
     {

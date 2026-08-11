@@ -28,6 +28,7 @@ const orderSchema = mongoose.Schema({
   restaurant: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Restaurant",
+    required: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

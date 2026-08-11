@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Route, Routes } from "react-router-dom";
+import { toast } from "react-toastify";
 import { logout } from "../../redux/actions/userActions";
 
 import Search from "./Search";
@@ -28,8 +29,7 @@ const Header = () => {
   const logoutHandler = () => {
     dispatch(logout());
     setDropdownOpen(false);
-    // Use toast instead of blocking window.alert
-    window.alert("Logged out successfully");
+    toast.success("Logged out successfully");
   };
 
   return (

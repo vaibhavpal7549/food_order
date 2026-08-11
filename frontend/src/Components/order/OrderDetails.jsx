@@ -15,7 +15,7 @@ const OrderDetails = () => {
   const { id } = useParams();
 
   //  order state
-  const { loading, error, order } = useSelector((state) => state.order);
+  const { loading, error, orderDetails: order } = useSelector((state) => state.order);
 
 
   // fetch data

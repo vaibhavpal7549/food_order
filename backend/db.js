@@ -8,7 +8,7 @@ const connectDB = async () => {
     try {
       console.log("Connecting to MongoDB Atlas...");
       const connection = await mongoose.connect(primaryURI, {
-        serverSelectionTimeoutMS: 5000, // 5s timeout for Atlas connection attempts
+        serverSelectionTimeoutMS: 10000, // 10s timeout for Atlas cold-start tolerance
       });
       const host = connection.connection.host || "unknown-host";
       const databaseName = connection.connection.name || "unknown-db";
@@ -25,7 +25,7 @@ const connectDB = async () => {
     try {
       console.log("Connecting to Local MongoDB...");
       const connection = await mongoose.connect(fallbackURI, {
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 10000,
       });
       const host = connection.connection.host || "127.0.0.1";
       const databaseName = connection.connection.name || "food_ordering_db";

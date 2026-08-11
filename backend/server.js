@@ -1,14 +1,13 @@
 //start the server
 
-//load env variables
-//start server
+//import dotenv — MUST be first so all process.env vars are available
+//when app.js, db.js, and any other modules are required.
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config/config.env" });
 
 //Import app
-const app = require("./app")
-const connectDatabase = require("./db")
-
-//import dotenv
-const dotenv = require("dotenv");
+const app = require("./app");
+const connectDatabase = require("./db");
 
 // Handle Uncaught exceptions
 process.on("uncaughtException", (err) => {
@@ -16,9 +15,6 @@ process.on("uncaughtException", (err) => {
   console.log("Shutting down server due to uncaught exception");
   process.exit(1);
 });
-
-//Load config
-dotenv.config({ path: "./config/config.env" })
 
 //connect to database
 connectDatabase();

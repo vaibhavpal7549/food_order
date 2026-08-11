@@ -26,53 +26,15 @@ class APIFeatures {
   filter() {
     const queryCopy = { ...this.queryStr };
 
-    console.log(queryCopy);
-
     // Removing fields from the query
-    const removeFields = ["keyword", "limit", "page"];
+    const removeFields = ["keyword", "limit", "page", "sortBy"];
     removeFields.forEach((el) => delete queryCopy[el]);
-
-    console.log(queryCopy);
-
-    //{ price: { gte: '1', lte: '200' } }
-
-    //this.query = this.query.find(queryCopy);
 
     // Advance filter for price , ratings etc
     let queryStr = JSON.stringify(queryCopy);
-
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
 
-    console.log(queryStr);
-
-    //{ price: { gte: '1', lte: '200' } }
-    // gte , lte etc are mongo operators and each mongo operator starts with $ sign eg $lte
-    // so we have to add $ sign  $lte and $gte . Hence we replace as above
-    // console.log(queryCopy);
-
     this.query = this.query.find(JSON.parse(queryStr));
-
-    // Check if sortBy is specified in the query parameters
-    if (this.queryStr.sortBy) {
-      const sortBy = this.queryStr.sortBy.toLowerCase();
-      let sortQuery = {}; // FIX: declare before use (was missing, caused ReferenceError)
-
-      // Sort by ratings (highest to lowest)
-      if (sortBy === "ratings") {
-        sortQuery = { ratings: -1 };
-      }
-      // Sort by reviews (highest to lowest)
-      else if (sortBy === "reviews") {
-        sortQuery = { numOfReviews: -1 };
-      }
-
-      // Apply the sorting query to the APIFeatures
-      this.query = this.query.sort(sortQuery);
-    }
-
-    //db.sar.find({“Last_Name”:{$gte:“C”}})
-    //this.query = this.query.find({ 'queryStr.price': { $gte: '900' } });
-    //console.log(this.query);
     return this;
   }
 

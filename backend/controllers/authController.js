@@ -185,7 +185,10 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
 
     const image_id = user.avatar.public_id;
 
-    await cloudinary.uploader.destroy(image_id);
+    // BUG-08: Only destroy Cloudinary asset if it's a real upload, not the default placeholder
+    if (image_id && image_id !== "default") {
+      await cloudinary.uploader.destroy(image_id);
+    }
 
     const result = await cloudinary.uploader.upload(req.body.avatar, {
       folder: "avatars",
@@ -291,7 +294,7 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
   res.cookie("jwt", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax", // ISSUE-03: matches login cookie sameSite value
     secure: (process.env.NODE_ENV || "development").toLowerCase() === "production",
   });
 

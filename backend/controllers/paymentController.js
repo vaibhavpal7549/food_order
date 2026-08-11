@@ -1,9 +1,9 @@
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const FoodItem = require("../models/foodItem");
-const dotenv = require("dotenv");
-dotenv.config({ path: "./config/config.env" });
 
+// Stripe is configured via process.env loaded in server.js
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 
 exports.processPayment = catchAsyncErrors(async (req, res, next) => {
   const rawItems = Array.isArray(req.body.items) ? req.body.items : [];

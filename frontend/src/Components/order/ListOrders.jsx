@@ -8,7 +8,6 @@ const DataTable = DataTableModule.default || DataTableModule;
 
 import Loader from "../layout/Loader";
 
-import { getRestaurants } from "../../redux/actions/restaurantActions";
 import { myOrders } from "../../redux/actions/orderActions";
 import { clearErrors } from "../../redux/slices/orderSlice";
 
@@ -21,7 +20,6 @@ const ListOrders = () => {
 
   useEffect(() => {
     dispatch(myOrders());
-    dispatch(getRestaurants());
   }, [dispatch]);
 
   useEffect(() => {

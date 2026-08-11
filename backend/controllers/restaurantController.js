@@ -36,6 +36,25 @@ exports.getRestaurant = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.updateRestaurant = catchAsync(async (req, res, next) => {
+  const restaurant = await Restaurant.findByIdAndUpdate(
+    req.params.storeId,
+    req.body,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!restaurant)
+    return next(new ErrorHandler("No document found with that ID", 404));
+
+  res.status(200).json({
+    status: "success",
+    data: restaurant,
+  });
+});
+
 exports.deleteRestaurant = catchAsync(async (req, res, next) => {
   const restaurant = await Restaurant.findByIdAndDelete(req.params.storeId);
 

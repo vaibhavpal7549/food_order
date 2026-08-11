@@ -34,6 +34,7 @@ const auth = require("./routes/auth");
 const payment = require("./routes/payment");
 const cart = require("./routes/cart");
 const restaurantCount = require("./routes/restaurant_count");
+const aiRouter = require("./routes/ai");
 
 app.use("/api/v1/eats", foodRouter);
 app.use("/api/v1/eats/menus", menuRouter);
@@ -43,6 +44,7 @@ app.use("/api/v1/users", auth);
 app.use("/api/v1", payment);
 app.use("/api/v1/eats/cart", cart);
 app.use("/api/v1/eats/restaurants", restaurantCount);
+app.use("/api/v1/ai", aiRouter);
 
 // 404 handler
 app.all("*", (req, res) => {
