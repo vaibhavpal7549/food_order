@@ -1,43 +1,33 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
+
+// Configure DNS servers to prevent Windows ISP querySrv ECONNREFUSED issue with Atlas mongodb+srv URIs
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (err) {
+  // Ignore if custom DNS fails to set
+}
 
 const connectDB = async () => {
-  const primaryURI = process.env.MONGO_ATLAS_URI || process.env.MONGO_URI;
-  const fallbackURI = process.env.MONGO_LOCAL_URI || "mongodb://127.0.0.1:27017/food_ordering_db";
+  const mongoURI = process.env.MONGO_ATLAS_URI || process.env.MONGO_URI;
 
-  if (primaryURI) {
-    try {
-      console.log("Connecting to MongoDB Atlas...");
-      const connection = await mongoose.connect(primaryURI, {
-        serverSelectionTimeoutMS: 10000, // 10s timeout for Atlas cold-start tolerance
-      });
-      const host = connection.connection.host || "unknown-host";
-      const databaseName = connection.connection.name || "unknown-db";
-      console.log(`MongoDB Connected (Atlas): ${host}/${databaseName}`);
-      return;
-    } catch (error) {
-      console.warn(
-        `MongoDB Atlas Connection Failed (${error.message}). Attempting fallback to Local MongoDB...`
-      );
-    }
+  if (!mongoURI) {
+    console.error("CRITICAL: MONGO_ATLAS_URI or MONGO_URI is not defined in environment variables.");
+    process.exit(1);
   }
 
-  if (fallbackURI) {
-    try {
-      console.log("Connecting to Local MongoDB...");
-      const connection = await mongoose.connect(fallbackURI, {
-        serverSelectionTimeoutMS: 10000,
-      });
-      const host = connection.connection.host || "127.0.0.1";
-      const databaseName = connection.connection.name || "food_ordering_db";
-      console.log(`MongoDB Connected (Local Fallback): ${host}/${databaseName}`);
-      return;
-    } catch (fallbackError) {
-      console.error("Local MongoDB Connection Error:", fallbackError.message);
-    }
+  try {
+    console.log("Connecting to MongoDB Atlas...");
+    const connection = await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 10000,
+    });
+    const host = connection.connection.host || "unknown-host";
+    const databaseName = connection.connection.name || "unknown-db";
+    console.log(`MongoDB Connected (Atlas): ${host}/${databaseName}`);
+  } catch (error) {
+    console.error(`MongoDB Atlas Connection Error: ${error.message}`);
+    process.exit(1);
   }
-
-  console.error("CRITICAL: Failed to connect to both Primary and Fallback MongoDB instances.");
-  process.exit(1);
 };
 
 module.exports = connectDB;

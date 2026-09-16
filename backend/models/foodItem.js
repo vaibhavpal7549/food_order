@@ -10,6 +10,7 @@ const foodSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: [true, "Please enter FoodItem price"],
+    min: [0, "FoodItem price cannot be negative"],
     max: [99999, "FoodItem price cannot exceed 99999"],
     default: 0.0,
   },
@@ -41,6 +42,7 @@ const foodSchema = new mongoose.Schema({
   stock: {
     type: Number,
     required: [true, "Please enter foodItem stock"],
+    min: [0, "FoodItem stock cannot be negative"],
     max: [99999, "foodItems stock can't exceed 99999"],
     default: 0,
   },
@@ -54,6 +56,10 @@ const foodSchema = new mongoose.Schema({
   },
   reviews: [
     {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
       name: {
         type: String,
         required: true,
@@ -62,7 +68,7 @@ const foodSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
-      Comment: {
+      comment: {
         type: String,
         required: true,
       },

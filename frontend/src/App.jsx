@@ -18,6 +18,7 @@ import Cart from './Components/cart/Cart';
 import OrderSuccess from './Components/cart/OrderSuccess';
 import ListOrders from './Components/order/ListOrders';
 import OrderDetails from './Components/order/OrderDetails';
+import Dashboard from './Components/admin/Dashboard';
 
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -51,9 +52,11 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/success" element={<OrderSuccess />} />
 
-              {/* Order routes — were missing, causing blank pages */}
+              {/* Order routes */}
               <Route path="/eats/orders/me/myOrders" element={<ListOrders />} />
               <Route path="/eats/orders/:id" element={<OrderDetails />} />
+              {/* Admin dashboard */}
+              <Route path="/admin/dashboard" element={<Dashboard />} />
             </Routes>
           </div>
         </div>

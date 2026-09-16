@@ -6,7 +6,6 @@ import { clearErrors } from "../../redux/slices/userSlice";
 import { toast } from "react-toastify";
 
 const Register = () => {
- 
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -20,12 +19,44 @@ const Register = () => {
   const [avatar, setAvatar] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("/images/images.png");
 
+  const [errors, setErrors] = useState({
+    email: "",
+    phoneNumber: "",
+  });
+
+  const [touched, setTouched] = useState({
+    email: false,
+    phoneNumber: false,
+  });
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { isAuthenticated, error, loading } = useSelector(
     (state) => state.user
   );
+
+  const validateEmail = (val) => {
+    if (!val || val.trim() === "") {
+      return "Please enter a valid email";
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val.trim())) {
+      return "Please enter a valid email";
+    }
+    return "";
+  };
+
+  const validatePhoneNumber = (val) => {
+    if (!val || val.trim() === "") {
+      return "Please enter a valid phone number";
+    }
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(val.trim())) {
+      return "Please enter a valid phone number";
+    }
+    return "";
+  };
 
   // Show registration errors via toast
   useEffect(() => {
@@ -42,25 +73,60 @@ const Register = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const submitHandler = (e) => {
-  e.preventDefault();
-
-  if (password !== passwordConfirm) {
-    toast.error("Passwords do not match", { position: "bottom-right" });
-    return;
-  }
-
-  const userData = {
-    name,
-    email,
-    password,
-    passwordConfirm,
-    phoneNumber,
-    avatar: avatar === "" ? "/images/images.png" : avatar,
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    if (name === "email") {
+      setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+    } else if (name === "phoneNumber") {
+      setErrors((prev) => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
+    }
   };
 
-  dispatch(register(userData)); 
-};
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    const emailErr = validateEmail(email);
+    const phoneErr = validatePhoneNumber(phoneNumber);
+
+    setTouched({ email: true, phoneNumber: true });
+    setErrors({ email: emailErr, phoneNumber: phoneErr });
+
+    if (emailErr && phoneErr) {
+      toast.error("Please enter a valid email and valid phone number", {
+        position: "bottom-right",
+      });
+      return;
+    }
+
+    if (emailErr) {
+      toast.error("Please enter a valid email", { position: "bottom-right" });
+      return;
+    }
+
+    if (phoneErr) {
+      toast.error("Please enter a valid phone number", {
+        position: "bottom-right",
+      });
+      return;
+    }
+
+    if (password !== passwordConfirm) {
+      toast.error("Passwords do not match", { position: "bottom-right" });
+      return;
+    }
+
+    const userData = {
+      name,
+      email,
+      password,
+      passwordConfirm,
+      phoneNumber,
+      avatar: avatar === "" ? "/images/images.png" : avatar,
+    };
+
+    dispatch(register(userData));
+  };
 
   const onChange = (e) => {
     if (e.target.name === "avatar") {
@@ -74,7 +140,14 @@ const Register = () => {
       };
       reader.readAsDataURL(e.target.files[0]);
     } else {
-      setUser({ ...user, [e.target.name]: e.target.value });
+      const { name, value } = e.target;
+      setUser({ ...user, [name]: value });
+
+      if (name === "email") {
+        setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+      } else if (name === "phoneNumber") {
+        setErrors((prev) => ({ ...prev, phoneNumber: validatePhoneNumber(value) }));
+      }
     }
   };
 
@@ -104,11 +177,15 @@ const Register = () => {
               <input
                 type="email"
                 id="email_field"
-                className="form-control"
+                className={`form-control ${touched.email && errors.email ? "is-invalid" : ""}`}
                 name="email"
                 value={email}
                 onChange={onChange}
+                onBlur={handleBlur}
               ></input>
+              {touched.email && errors.email && (
+                <small className="text-danger d-block mt-1">{errors.email}</small>
+              )}
             </div>
             <div className="form-group">
               <label htmlFor="password_field">Password</label>
@@ -135,13 +212,18 @@ const Register = () => {
             <div className="form-group">
               <label htmlFor="phoneNumber_field">Phone Number</label>
               <input
-                type="number"
+                type="tel"
                 id="phoneNumber_field"
-                className="form-control"
+                className={`form-control ${touched.phoneNumber && errors.phoneNumber ? "is-invalid" : ""}`}
                 name="phoneNumber"
+                placeholder="10 digit phone number"
                 value={phoneNumber}
                 onChange={onChange}
+                onBlur={handleBlur}
               ></input>
+              {touched.phoneNumber && errors.phoneNumber && (
+                <small className="text-danger d-block mt-1">{errors.phoneNumber}</small>
+              )}
             </div>
             <div className="form-group">
               <label htmlFor="avatar_upload">Avatar</label>

@@ -29,10 +29,16 @@ const userSchema = new mongoose.Schema(
 
   passwordConfirm: {
     type: String,
-    required: [true, "Confirm password"],
+    required: [
+      function () {
+        return this.isNew || this.isModified("password");
+      },
+      "Confirm password is required",
+    ],
     select: false,
     validate: {
       validator: function (el) {
+        if (!this.isModified("password")) return true;
         return el === this.password;
       },
       message: "Passwords are not same",
@@ -100,7 +106,7 @@ userSchema.methods.getJWTToken = function () {
   return jwt.sign(
     { id: this._id },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE }
+    { expiresIn: process.env.JWT_EXPIRE || process.env.JWT_EXPIRES_TIME || "7d" }
   );
 };
 

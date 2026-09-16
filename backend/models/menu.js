@@ -16,9 +16,12 @@ const menuSchema = new mongoose.Schema(
     restaurant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Restaurant",
+      required: [true, "Restaurant ID is required for a menu"],
+      index: true,
     },
   },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },

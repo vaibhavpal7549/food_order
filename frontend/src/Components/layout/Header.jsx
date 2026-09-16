@@ -103,6 +103,16 @@ const Header = () => {
                     minWidth: "10rem",
                   }}
                 >
+                  {user?.role === "admin" && (
+                    <Link
+                      className="dropdown-item"
+                      to="/admin/dashboard"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  )}
+
                   <Link
                     className="dropdown-item"
                     to="/eats/orders/me/myOrders"

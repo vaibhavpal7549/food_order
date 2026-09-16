@@ -108,6 +108,9 @@ orderSchema.index({ "paymentInfo.id": 1 }, { unique: true, sparse: true });
 
 
 orderSchema.pre("save", async function (next) {
+  // Only deduct stock on new order creation, not on order status/payment updates
+  if (!this.isNew) return next();
+
   try {
     for (const orderItem of this.orderItems) {
       const foodItem = await mongoose

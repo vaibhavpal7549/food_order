@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { updateProfile, loadUser } from "../../redux/actions/userActions";
 import { clearErrors, updateReset } from "../../redux/slices/userSlice";
 
@@ -17,24 +18,47 @@ const UpdateProfile = () => {
 
   useEffect(() => {
     if (error) {
-      window.alert(error);
+      toast.error(error, { position: "bottom-right" });
       dispatch(clearErrors());
     }
 
     if (isUpdated) {
-      window.alert("User updated successfully");
+      toast.success("User updated successfully", { position: "bottom-right" });
       dispatch(loadUser());
       dispatch(updateReset());
       navigate("/users/me");
     }
   }, [dispatch, error, isUpdated, navigate]);
 
+  const [emailError, setEmailError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  const validateEmail = (val) => {
+    if (!val || val.trim() === "") {
+      return "";
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val.trim())) {
+      return "Please enter a valid email";
+    }
+    return "";
+  };
+
   const submitHandler = (e) => {
     e.preventDefault();
 
+    const targetEmail = email || user?.email || "";
+    const err = validateEmail(targetEmail);
+    if (err) {
+      setEmailError(err);
+      setEmailTouched(true);
+      toast.error(err, { position: "bottom-right" });
+      return;
+    }
+
     const formData = new FormData();
     formData.set("name", name || user?.name || "");
-    formData.set("email", email || user?.email || "");
+    formData.set("email", targetEmail);
     formData.set("avatar", avatar);
 
     dispatch(updateProfile(formData));
@@ -86,12 +110,23 @@ const UpdateProfile = () => {
             <input
               type="email"
               id="email_field"
-              className="form-control"
+              className={`form-control ${emailTouched && emailError ? "is-invalid" : ""}`}
               name="email"
               value={email}
               placeholder={user?.email || ""}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setEmail(val);
+                setEmailError(validateEmail(val));
+              }}
+              onBlur={() => {
+                setEmailTouched(true);
+                setEmailError(validateEmail(email));
+              }}
             />
+            {emailTouched && emailError && (
+              <small className="text-danger d-block mt-1">{emailError}</small>
+            )}
           </div>
 
           <div className="form-group">
