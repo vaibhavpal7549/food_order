@@ -55,19 +55,18 @@ const Header = () => {
 
         {/* right side */}
         <div className="col-12 col-md-3 mt-4 mt-md-0 text-center">
-          <Link to="/cart" style={{ textDecoration: "none" }}>
-            <span className="ml-3" id="cart">
-              Cart
-            </span>
-            <span className="ml-1" id="cart_count">
-              {cartCount}
-            </span>
-          </Link>
+          {(!user || (user.role !== "admin" && user.role !== "restaurant-owner")) && (
+            <Link to="/cart" style={{ textDecoration: "none" }}>
+              <span className="ml-3" id="cart">
+                Cart
+              </span>
+              <span className="ml-1" id="cart_count">
+                {cartCount}
+              </span>
+            </Link>
+          )}
 
           {user ? (
-            /* FIX BUG-12: replaced Bootstrap 4 jQuery data-toggle dropdown
-               with a React state-based dropdown. The old version relied on
-               jQuery which is not bundled, so the dropdown never opened. */
             <div
               className="ml-4 dropdown d-inline"
               ref={dropdownRef}
@@ -103,7 +102,7 @@ const Header = () => {
                     minWidth: "10rem",
                   }}
                 >
-                  {user?.role === "admin" && (
+                  {(user?.role === "admin" || user?.role === "restaurant-owner") ? (
                     <Link
                       className="dropdown-item"
                       to="/admin/dashboard"
@@ -111,15 +110,15 @@ const Header = () => {
                     >
                       Dashboard
                     </Link>
+                  ) : (
+                    <Link
+                      className="dropdown-item"
+                      to="/eats/orders/me/myOrders"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      Orders
+                    </Link>
                   )}
-
-                  <Link
-                    className="dropdown-item"
-                    to="/eats/orders/me/myOrders"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    Orders
-                  </Link>
 
                   <Link
                     className="dropdown-item"

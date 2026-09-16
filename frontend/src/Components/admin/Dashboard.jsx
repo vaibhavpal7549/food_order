@@ -89,9 +89,6 @@ const Dashboard = () => {
           <Link to="/" className="action-btn action-view-restaurants">
             🏪 View Restaurants
           </Link>
-          <Link to="/eats/orders/me/myOrders" className="action-btn action-view-orders">
-            📋 View Orders
-          </Link>
           <Link to="/users/me" className="action-btn action-profile">
             👤 My Profile
           </Link>
