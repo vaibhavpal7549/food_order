@@ -50,6 +50,24 @@ export const createRestaurant = createAsyncThunk(
   }
 );
 
+// UPDATE RESTAURANT - admin
+export const updateRestaurant = createAsyncThunk(
+  "restaurants/updateRestaurant",
+  async ({ id, restaurantData }, { rejectWithValue }) => {
+    try {
+      const { data } = await api.patch(`/v1/eats/stores/${id}`, restaurantData);
+      console.log("Restaurant updated", data);
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.errMessage ||
+          error.response?.data?.message ||
+          error.message
+      );
+    }
+  }
+);
+
 
 // DELETE RESTAURANT - admin
 export const deleteRestaurant = createAsyncThunk(

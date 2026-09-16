@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteRestaurant } from "../redux/actions/restaurantActions";
 
-const Restaurant = ({ restaurant }) => {
+const Restaurant = ({ restaurant, onEdit }) => {
   const dispatch = useDispatch();
   const [imageError, setImageError] = useState(false);
 
@@ -88,14 +88,22 @@ const Restaurant = ({ restaurant }) => {
               </div>
             )}
 
-          {/* ADMIN CONTROLS (ONLY DELETE NOW) */}
+          {/* ADMIN CONTROLS (EDIT & DELETE) */}
           {isAuthenticated && user?.role === "admin" && (
-            <button
-              className="btn btn-danger btn-sm mt-2"
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
+            <div className="d-flex mt-2" style={{ gap: "6px" }}>
+              <button
+                className="btn btn-outline-primary btn-sm flex-fill"
+                onClick={() => onEdit && onEdit(restaurant)}
+              >
+                ✏️ Edit
+              </button>
+              <button
+                className="btn btn-danger btn-sm flex-fill"
+                onClick={handleDelete}
+              >
+                Delete
+              </button>
+            </div>
           )}
         </div>
       </div>

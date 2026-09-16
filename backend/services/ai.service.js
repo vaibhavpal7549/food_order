@@ -56,23 +56,30 @@ Return JSON in this EXACT format:
 };
 
 exports.generateRestaurantDescription = async ({ name, address, isVeg }) => {
+  const ensureUnder200 = (str) => {
+    if (!str) return "";
+    let text = str.trim().replace(/\s+/g, " ");
+    if (text.length <= 200) return text;
+    let truncated = text.substring(0, 196);
+    const lastSpace = truncated.lastIndexOf(" ");
+    if (lastSpace > 130) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+    return truncated + "...";
+  };
+
   const prompt = `
-You are a top restaurant critic and culinary copywriter.
-Generate a unique, engaging 2-3 sentence description for the restaurant below.
+You are a top culinary copywriter.
+Generate a unique, punchy 1-2 sentence description for the restaurant below.
 
 Restaurant Name: ${name}
 Location: ${address || "City Center"}
 Type: ${isVeg ? "100% Pure Vegetarian" : "Multi-Cuisine Veg & Non-Veg"}
 
-Rules:
-- Be specific, creative, and evocative.
-- Mention signature atmosphere, culinary style, and fresh ingredients.
-- Do NOT use generic repetitive templates.
-
-Return JSON in this EXACT format:
-{
-  "description": "string"
-}
+STRICT RULES:
+1. MAX 200 CHARACTERS TOTAL. Must be snappy and strictly under 200 characters.
+2. Be highly creative, fresh, and unique every time. Do not repeat standard phrases.
+3. Return ONLY valid JSON in this format: {"description": "string"}
 `;
 
   try {
@@ -82,8 +89,8 @@ Return JSON in this EXACT format:
         {
           model: "llama-3.1-8b-instant",
           messages: [{ role: "user", content: prompt }],
-          temperature: 0.8,
-          max_tokens: 200,
+          temperature: 0.9,
+          max_tokens: 150,
         },
         {
           headers: {
@@ -93,14 +100,17 @@ Return JSON in this EXACT format:
         }
       );
       const cleaned = response.data.choices[0].message.content.replace(/```json|```/g, "").trim();
-      return JSON.parse(cleaned);
+      const parsed = JSON.parse(cleaned);
+      if (parsed?.description) {
+        return { description: ensureUnder200(parsed.description) };
+      }
     }
   } catch (err) {
-    console.warn("AI API call failed, using intelligent dynamic generator:", err.message);
+    console.warn("AI API call failed, using dynamic copywriting engine:", err.message);
   }
 
-  // Smart Dynamic Copywriting Engine
-  const loc = address?.trim() ? address.trim() : "the heart of town";
+  // Dynamic High-Variety Copywriting Engine (Guaranteed <= 200 chars)
+  const loc = address?.trim() ? address.trim() : "City Center";
   const rName = name?.trim() || "Our Restaurant";
   const lowerName = rName.toLowerCase();
 
@@ -110,54 +120,71 @@ Return JSON in this EXACT format:
   const isBiryani = lowerName.includes("biryani") || lowerName.includes("kebab") || lowerName.includes("grill");
   const isCafe = lowerName.includes("cafe") || lowerName.includes("coffee");
 
-  const ambiances = [
-    "warm and welcoming ambiance",
-    "vibrant and modern atmosphere",
-    "cozy, family-friendly setting",
-    "charming and lively dining space",
-    "elegant yet relaxed environment",
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  const openers = [
+    `Located in ${loc}, ${rName} offers`,
+    `Discover ${rName} in ${loc} for`,
+    `At ${rName} in ${loc}, enjoy`,
+    `Visit ${rName} at ${loc} to taste`,
+    `Welcome to ${rName} (${loc}), serving`,
   ];
 
-  const vegHighlights = [
-    "wholesome 100% pure vegetarian delicacies",
-    "authentic plant-based regional recipes",
-    "fresh, soul-nourishing vegetarian specialties",
-    "rich, aromatic veg thalis and signature curries",
+  const closers = [
+    `A must-visit spot for food lovers!`,
+    `Perfect for family and friends.`,
+    `Crafted for ultimate taste!`,
+    `Taste the passion in every bite.`,
+    `Great food and welcoming vibe!`,
   ];
 
-  const nonVegHighlights = [
-    "exquisite multi-cuisine creations and flavorful grills",
-    "mouth-watering North Indian & Continental delights",
-    "rich, aromatic gravies and succulent chef specials",
-    "diverse culinary favorites crafted for every palate",
-  ];
-
-  const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-  const ambiance = pickRandom(ambiances);
-  const foodHighlight = isVeg ? pickRandom(vegHighlights) : pickRandom(nonVegHighlights);
-
-  let customBio = "";
+  let bodyOptions = [];
 
   if (isBakery) {
-    customBio = `Indulge in freshly baked treats, artisanal cakes, and oven-hot delights at ${rName}, located in ${loc}. Known for rich flavors, premium ingredients, and a cozy atmosphere that makes every bite special.`;
-  } else if (isPizza) {
-    customBio = `Craving cheesy goodness? ${rName} in ${loc} serves hand-tossed pizzas, juicy burgers, and crispy sides made with farm-fresh toppings and bold, savory sauces.`;
-  } else if (isDhaba) {
-    customBio = `Experience authentic rustic flavors and slow-cooked traditional recipes at ${rName}, ${loc}. Serving rich, hearty dishes cooked with pure ghee, aromatic spices, and traditional warmth.`;
-  } else if (isBiryani) {
-    customBio = `Step into ${rName} in ${loc} for fragrant, long-grain biryanis, tender kebabs, and rich Mughlai delicacies cooked to perfection with authentic heritage spices.`;
-  } else if (isCafe) {
-    customBio = `A perfect spot to relax and unwind, ${rName} in ${loc} offers handcrafted coffees, refreshing beverages, and gourmet quick bites in a stylish, cozy setting.`;
-  } else {
-    const templates = [
-      `Located in ${loc}, ${rName} brings you a ${ambiance} paired with ${foodHighlight}. Every dish is prepared with handpicked ingredients and passion to deliver an unforgettable dining experience.`,
-      `Discover culinary excellence at ${rName}, situated in ${loc}. Featuring ${foodHighlight} served in a ${ambiance}, it's the ultimate destination for food lovers and family gatherings.`,
-      `At ${rName} in ${loc}, we take pride in serving ${foodHighlight} in a ${ambiance}. Come enjoy authentic taste, hospitable service, and memorable meals with your loved ones.`,
-      `${rName} welcomes food enthusiasts in ${loc} with a ${ambiance} and a curated menu of ${foodHighlight}. Crafted to perfection for an exceptional taste adventure.`,
+    bodyOptions = [
+      "freshly baked pastries, custom cakes, and artisanal sweet treats.",
+      "oven-hot delights, rich desserts, and handcrafted cakes baked daily.",
+      "mouth-watering baked goods made with premium, fresh ingredients.",
     ];
-    customBio = pickRandom(templates);
+  } else if (isPizza) {
+    bodyOptions = [
+      "hand-tossed pizzas, juicy burgers, and crispy sides packed with flavor.",
+      "cheesy wood-fired pizzas, gourmet burgers, and quick savory bites.",
+      "fresh pizzas loaded with farm-fresh toppings and signature sauces.",
+    ];
+  } else if (isDhaba) {
+    bodyOptions = [
+      "authentic rustic Indian flavors, rich thalis, and traditional slow-cooked curries.",
+      "hearty dhaba-style meals, hot butter naan, and aromatic North Indian dishes.",
+      "wholesome home-style thalis prepared with pure ghee and heritage spices.",
+    ];
+  } else if (isBiryani) {
+    bodyOptions = [
+      "fragrant long-grain biryanis, tender kebabs, and rich Mughlai specialties.",
+      "smoky tandoori grills, aromatic dum biryani, and rich flavorful gravies.",
+      "authentic heritage biryanis cooked to perfection with aromatic spices.",
+    ];
+  } else if (isCafe) {
+    bodyOptions = [
+      "artisan coffees, refreshing beverages, and gourmet bites in a cozy setting.",
+      "handcrafted espresso drinks, delicious snacks, and a stylish relaxing vibe.",
+      "specialty brews and fresh light eats—ideal for hangout and conversation.",
+    ];
+  } else if (isVeg) {
+    bodyOptions = [
+      "100% pure veg specialties, fresh ingredients, and a warm family ambiance.",
+      "delicious plant-based dishes, rich curries, and authentic regional flavors.",
+      "wholesome vegetarian meals prepared fresh with rich aromatic spices.",
+    ];
+  } else {
+    bodyOptions = [
+      "flavorful multi-cuisine dishes, rich gravies, and a vibrant dining experience.",
+      "exquisite chef specials, mouth-watering grills, and memorable dining moments.",
+      "diverse culinary favorites, fresh ingredients, and warm hospitality.",
+    ];
   }
 
-  return { description: customBio };
+  const generatedText = `${pick(openers)} ${pick(bodyOptions)} ${pick(closers)}`;
+  return { description: ensureUnder200(generatedText) };
 };
 

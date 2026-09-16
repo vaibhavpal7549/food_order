@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getRestaurants, createRestaurant, deleteRestaurant, analyzeReviews } from "../actions/restaurantActions";
+import { getRestaurants, createRestaurant, updateRestaurant, deleteRestaurant, analyzeReviews } from "../actions/restaurantActions";
 
 const initialState = {
     restaurants: [],
@@ -10,6 +10,8 @@ const initialState = {
     pureVegRestaurantsCount: 0,
     creating: false,
     createError: null,
+    updating: false,
+    updateError: null,
     deleting: false,
     deleteError: null,
 };
@@ -64,6 +66,26 @@ const restaurantSlice = createSlice({
         .addCase(createRestaurant.rejected, (state, action) => {
             state.creating = false;
             state.createError = action.payload;
+        })
+
+        // UPDATE
+        .addCase(updateRestaurant.pending, (state) => {
+            state.updating = true;
+            state.updateError = null;
+        })
+        .addCase(updateRestaurant.fulfilled, (state, action) => {
+            state.updating = false;
+            const updated = action.payload.data;
+            if (updated && updated._id) {
+                const index = state.restaurants.findIndex((r) => r._id === updated._id);
+                if (index !== -1) {
+                    state.restaurants[index] = updated;
+                }
+            }
+        })
+        .addCase(updateRestaurant.rejected, (state, action) => {
+            state.updating = false;
+            state.updateError = action.payload;
         })
 
         // DELETE
