@@ -4,6 +4,7 @@ const { protect } = require("../controllers/authController");
 const { authorizeRoles } = require("../middlewares/authorizeRoles");
 const {
   generateFoodAI,
+  generateRestaurantAI,
   generateAndSaveFoodAI,
   analyzeFoodReviewsAI,
   analyzeRestaurantReviewsAI,
@@ -13,6 +14,10 @@ const {
 // POST /api/v1/ai/generate-food-ai
 // Used by Menu.jsx to AI-generate a dish description from name/category/price
 router.post("/generate-food-ai", protect, generateFoodAI);
+
+// POST /api/v1/ai/generate-restaurant-ai
+// Used by Home.jsx to AI-generate a restaurant description from name/address/isVeg
+router.post("/generate-restaurant-ai", protect, generateRestaurantAI);
 
 // POST /api/v1/ai/food/:foodId/generate-save
 // Generate + persist AI description to the food item document

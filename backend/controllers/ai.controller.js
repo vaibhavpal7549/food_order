@@ -27,6 +27,25 @@ exports.generateFoodAI = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+exports.generateRestaurantAI = catchAsyncErrors(async (req, res, next) => {
+  const { name, address, isVeg } = req.body;
+
+  if (!name) {
+    return next(new ErrorHandler("Restaurant name is required for AI generation", 400));
+  }
+
+  const aiData = await aiService.generateRestaurantDescription({
+    name,
+    address,
+    isVeg,
+  });
+
+  return res.status(200).json({
+    success: true,
+    data: aiData,
+  });
+});
+
 exports.generateAndSaveFoodAI = catchAsyncErrors(async (req, res, next) => {
   const { foodId } = req.params;
 

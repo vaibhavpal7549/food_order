@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import CountRestaurant from "./CountRestaurant";
 import { useParams } from "react-router-dom";
 
+import api from "../utils/api";
+
 const Home = () => {
   const dispatch = useDispatch();
   const { keyword } = useParams();
@@ -45,9 +47,11 @@ const Home = () => {
 
   // admin controls
   const [showCreate, setShowCreate] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
     address: "",
+    description: "",
     isVeg: false,
     location: { type: "Point", coordinates: [] },
     imageUrl: "",
@@ -62,6 +66,34 @@ const Home = () => {
   const handleCloseCreate = () => {
     setShowCreate(false);
     setCoordsInput("");
+  };
+
+  const handleGenerateAIDescription = async () => {
+    if (!newRestaurant.name) {
+      alert("Please enter a restaurant name first!");
+      return;
+    }
+
+    try {
+      setGeneratingAI(true);
+      const res = await api.post("/v1/ai/generate-restaurant-ai", {
+        name: newRestaurant.name,
+        address: newRestaurant.address,
+        isVeg: newRestaurant.isVeg,
+      });
+
+      if (res.data?.data?.description) {
+        setNewRestaurant((prev) => ({
+          ...prev,
+          description: res.data.data.description,
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to generate AI description:", err);
+      alert("Could not generate AI description. You can type it manually!");
+    } finally {
+      setGeneratingAI(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -93,15 +125,24 @@ const Home = () => {
   const submitCreate = async (e) => {
     e.preventDefault();
 
+    const coords =
+      newRestaurant.location?.coordinates?.length === 2
+        ? newRestaurant.location.coordinates
+        : [82.68, 25.75];
+
     const payload = {
       name: newRestaurant.name,
       address: newRestaurant.address,
+      description: newRestaurant.description,
       isVeg: newRestaurant.isVeg,
-      location: newRestaurant.location,
+      location: {
+        type: "Point",
+        coordinates: coords,
+      },
       images: [
         {
           public_id: "default",
-          url: newRestaurant.imageUrl,
+          url: newRestaurant.imageUrl || "/images/images.png",
         },
       ],
     };
@@ -112,6 +153,7 @@ const Home = () => {
     if (createRestaurant.fulfilled.match(result)) {
       handleCloseCreate();
       setCoordsInput("");
+      dispatch(getRestaurants());
     }
   };
 
@@ -200,6 +242,29 @@ const Home = () => {
                         value={newRestaurant.address}
                         onChange={handleChange}
                         required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <div className="d-flex align-items-center justify-content-between mb-1">
+                        <label className="mb-0">Description</label>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-success"
+                          style={{ fontSize: "12px", padding: "2px 8px" }}
+                          onClick={handleGenerateAIDescription}
+                          disabled={generatingAI}
+                        >
+                          {generatingAI ? "Generating..." : "✨ Generate with AI"}
+                        </button>
+                      </div>
+                      <textarea
+                        name="description"
+                        rows="3"
+                        className="form-control"
+                        value={newRestaurant.description}
+                        onChange={handleChange}
+                        placeholder="Enter description or click ✨ Generate with AI"
                       />
                     </div>
 

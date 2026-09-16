@@ -15,6 +15,11 @@ const restaurantSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter the restaurant address"],
   },
+  description: {
+    type: String,
+    trim: true,
+    default: "",
+  },
   ratings: {
     type: Number,
     default: 0,
@@ -27,11 +32,11 @@ const restaurantSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ["Point"],
-      required: true,
+      default: "Point",
     },
     coordinates: {
       type: [Number],
-      required: true,
+      default: [82.68, 25.75],
     },
   },
   reviews: [
@@ -59,11 +64,11 @@ const restaurantSchema = new mongoose.Schema({
     {
       public_id: {
         type: String,
-        required: true,
+        default: "default",
       },
       url: {
         type: String,
-        required: true,
+        default: "/images/images.png",
       },
     },
   ],

@@ -32,9 +32,9 @@ function App() {
     <>
       <ToastContainer />
       <Router>
-        <div className='App'>
+        <div className="App d-flex flex-column min-vh-100">
           <Header />
-          <div className='container container-fluids'>
+          <div className="container container-fluids flex-grow-1 my-4">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/eats/stores/search/:keyword" element={<Home />} />
@@ -59,9 +59,9 @@ function App() {
               <Route path="/admin/dashboard" element={<Dashboard />} />
             </Routes>
           </div>
+          <Footer />
         </div>
       </Router>
-      <Footer />
     </>
   )
 }

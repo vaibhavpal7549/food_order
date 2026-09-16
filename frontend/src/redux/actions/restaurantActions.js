@@ -42,7 +42,9 @@ export const createRestaurant = createAsyncThunk(
       return data; // backend response
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || error.message
+        error.response?.data?.errMessage ||
+          error.response?.data?.message ||
+          error.message
       );
     }
   }

@@ -15,6 +15,9 @@ const Menu = () => {
     (state) => state.menu
   );
 
+  const { restaurants } = useSelector((state) => state.restaurants);
+  const currentRestaurant = restaurants?.find((r) => r._id === id);
+
   const { isAuthenticated, user } = useSelector((state) => state.user);
 
   const [showMenuCreate, setShowMenuCreate] = useState(false);
@@ -84,6 +87,18 @@ const Menu = () => {
 
   return (
     <div>
+      {currentRestaurant && (
+        <div className="restaurant-header mb-4 p-4 border rounded bg-white shadow-sm">
+          <h1 className="mb-1">{currentRestaurant.name}</h1>
+          <p className="text-muted mb-2">📍 {currentRestaurant.address}</p>
+          {currentRestaurant.description && (
+            <p className="text-secondary lead mb-0" style={{ fontSize: "1.05rem" }}>
+              {currentRestaurant.description}
+            </p>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <p>Loading menus...</p>
       ) : error ? (
@@ -108,7 +123,7 @@ const Menu = () => {
               <div className="d-flex align-items-center">
                 <h2 className="mr-2">{menu.category}</h2>
 
-                {isAuthenticated && user && user.role === "admin" && (
+                {isAuthenticated && user && (user.role === "admin" || user.role === "restaurant-owner") && (
                   <>
                     <button
                       className="btn btn-sm btn-outline-primary"
@@ -156,7 +171,7 @@ const Menu = () => {
       )}
 
       {/* add menu button */}
-      {isAuthenticated && user && user.role === "admin" && (
+      {isAuthenticated && user && (user.role === "admin" || user.role === "restaurant-owner") && (
         <div className="my-3">
           <button
             className="btn btn-primary"

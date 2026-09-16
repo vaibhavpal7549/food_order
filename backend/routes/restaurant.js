@@ -17,13 +17,13 @@ const menuRoutes = require("./menu");
 router
   .route("/")
   .get(getAllRestaurants)
-  .post(protect, authorizeRoles("admin"), createRestaurant);
+  .post(protect, authorizeRoles("admin", "restaurant-owner"), createRestaurant);
 
 router
   .route("/:storeId")
   .get(getRestaurant)
-  .patch(protect, authorizeRoles("admin"), updateRestaurant)
-  .delete(protect, authorizeRoles("admin"), deleteRestaurant);
+  .patch(protect, authorizeRoles("admin", "restaurant-owner"), updateRestaurant)
+  .delete(protect, authorizeRoles("admin", "restaurant-owner"), deleteRestaurant);
 
 router.use("/:storeId/menus", menuRoutes);
 

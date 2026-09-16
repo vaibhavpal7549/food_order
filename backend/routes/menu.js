@@ -15,13 +15,13 @@ const { authorizeRoles } = require("../middlewares/authorizeRoles");
 router
   .route("/")
   .get(getAllMenus)
-  .post(protect, authorizeRoles("admin"), createMenu);
+  .post(protect, authorizeRoles("admin", "restaurant-owner"), createMenu);
 
 // add food item to a specific menu (more specific, must come before /:menuId)
 router
   .route("/:menuId/addItem")
-  .patch(protect, authorizeRoles("admin"), addItemToMenu);
+  .patch(protect, authorizeRoles("admin", "restaurant-owner"), addItemToMenu);
 
-router.route("/:menuId").delete(protect, authorizeRoles("admin"), deleteMenu);
+router.route("/:menuId").delete(protect, authorizeRoles("admin", "restaurant-owner"), deleteMenu);
 
 module.exports = router;

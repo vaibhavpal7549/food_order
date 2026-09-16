@@ -37,8 +37,16 @@ const Restaurant = ({ restaurant }) => {
         </Link>
 
         <div className="card-body d-flex flex-column">
-          <h5 className="card-title">{restaurant.name}</h5>
-          <p className="rest_address">{restaurant.address}</p>
+          <h5 className="card-title mb-1">{restaurant.name}</h5>
+          <p className="rest_address text-muted mb-2">{restaurant.address}</p>
+          {restaurant.description && (
+            <p
+              className="card-text text-secondary mb-3"
+              style={{ fontSize: "0.85rem", lineHeight: "1.35" }}
+            >
+              {restaurant.description}
+            </p>
+          )}
 
           {/* Ratings */}
           <div className="ratings mt-auto">
