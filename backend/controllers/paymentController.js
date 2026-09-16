@@ -29,12 +29,16 @@ exports.processPayment = catchAsyncErrors(async (req, res, next) => {
       return res.status(400).json({ message: `Insufficient stock for ${dbFoodItem.name}` });
     }
 
+    const rawImg = dbFoodItem.images?.[0]?.url;
+    const isFullUrl = rawImg && (rawImg.startsWith("http://") || rawImg.startsWith("https://"));
+    const imageList = isFullUrl ? [rawImg] : [];
+
     line_items.push({
       price_data: {
         currency: "inr",
         product_data: {
           name: dbFoodItem.name,
-          images: dbFoodItem.images?.[0]?.url ? [dbFoodItem.images[0].url] : [],
+          images: imageList,
         },
         unit_amount: Math.round(Number(dbFoodItem.price) * 100),
       },
@@ -42,42 +46,48 @@ exports.processPayment = catchAsyncErrors(async (req, res, next) => {
     });
   }
 
-  const session = await stripe.checkout.sessions.create({
-    customer_email: req.user.email,
-    phone_number_collection: {
-      enabled: true,
-    },
-    line_items,
-    mode: "payment",
-    shipping_address_collection: {
-      allowed_countries: ["US", "IN"],
-    },
-    shipping_options: [
-      {
-        shipping_rate_data: {
-          display_name: "Delivery Charges",
-          type: "fixed_amount",
-          fixed_amount: {
-            amount: 5500, // Amount in paise (e.g., 5500 = 55 INR)
-            currency: "inr",
-          },
-          delivery_estimate: {
-            minimum: {
-              unit: "hour",
-              value: 1,
+  try {
+    const session = await stripe.checkout.sessions.create({
+      customer_email: req.user?.email || undefined,
+      phone_number_collection: {
+        enabled: true,
+      },
+      line_items,
+      mode: "payment",
+      shipping_address_collection: {
+        allowed_countries: ["US", "IN"],
+      },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            display_name: "Delivery Charges",
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: 5500, // Amount in paise (e.g., 5500 = 55 INR)
+              currency: "inr",
             },
-            maximum: {
-              unit: "hour",
-              value: 3,
+            delivery_estimate: {
+              minimum: {
+                unit: "hour",
+                value: 1,
+              },
+              maximum: {
+                unit: "hour",
+                value: 3,
+              },
             },
           },
         },
-      },
-    ],
-    success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.FRONTEND_URL}/cart`,
-  });
-  res.status(200).json({ url: session.url });
+      ],
+      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/cart`,
+    });
+    res.status(200).json({ status: "success", url: session.url });
+  } catch (stripeErr) {
+    console.error("Stripe Checkout Error:", stripeErr.message);
+    const ErrorHandler = require("../utils/errorHandler");
+    return next(new ErrorHandler(stripeErr.message, 400));
+  }
 });
 
 

@@ -15,7 +15,11 @@ import {
 } from "../slices/orderSlice";
 
 const getErrorMessage = (error) =>
-  error.response?.data?.message || error.message || "Something went wrong";
+  error.response?.data?.errMessage ||
+  error.response?.data?.message ||
+  error.response?.data?.error?.message ||
+  error.message ||
+  "Something went wrong";
 
 // create order
 export const createOrder = (session_id) => async (dispatch) => {
