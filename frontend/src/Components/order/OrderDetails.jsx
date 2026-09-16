@@ -109,8 +109,8 @@ const OrderDetails = () => {
                 </span>
               </h4>
 
-              {/* Order Items */}
-              <h4 className="my-4">Order Items:</h4>
+              {/* Ordered Items */}
+              <h4 className="my-4">Ordered Items:</h4>
               <hr />
 
               <div className="cart-item my-1">

@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getRestaurants, createRestaurant, updateRestaurant, deleteRestaurant, analyzeReviews } from "../actions/restaurantActions";
+import { getRestaurants, createRestaurant, updateRestaurant, deleteRestaurant, analyzeReviews, createRestaurantReview } from "../actions/restaurantActions";
+
 
 const initialState = {
     restaurants: [],
@@ -124,8 +125,20 @@ const restaurantSlice = createSlice({
         .addCase(analyzeReviews.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
+        })
+
+        // CREATE REVIEW
+        .addCase(createRestaurantReview.fulfilled, (state, action) => {
+            const updated = action.payload.data;
+            if (updated && updated._id) {
+                const index = state.restaurants.findIndex((r) => r._id === updated._id);
+                if (index !== -1) {
+                    state.restaurants[index] = updated;
+                }
+            }
         });
     },
+
 });
 
 export const {

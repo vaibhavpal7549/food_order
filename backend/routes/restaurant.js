@@ -7,6 +7,7 @@ const {
   getRestaurant,
   updateRestaurant,
   deleteRestaurant,
+  createRestaurantReview,
 } = require("../controllers/restaurantController");
 
 const { protect } = require("../controllers/authController");
@@ -25,6 +26,9 @@ router
   .patch(protect, authorizeRoles("admin", "restaurant-owner"), updateRestaurant)
   .delete(protect, authorizeRoles("admin", "restaurant-owner"), deleteRestaurant);
 
+router.route("/:storeId/review").put(protect, createRestaurantReview);
+
 router.use("/:storeId/menus", menuRoutes);
 
 module.exports = router;
+

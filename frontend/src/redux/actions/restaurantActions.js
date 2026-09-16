@@ -110,3 +110,23 @@ export const analyzeReviews = createAsyncThunk(
     }
   }
 );
+
+// CREATE / UPDATE RESTAURANT REVIEW
+export const createRestaurantReview = createAsyncThunk(
+  "restaurants/createReview",
+  async ({ storeId, rating, comment }, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put(`/v1/eats/stores/${storeId}/review`, {
+        rating,
+        comment,
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.response?.data?.errMessage ||
+          error.message
+      );
+    }
+  }
+);

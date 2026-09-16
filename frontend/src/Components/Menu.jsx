@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { getMenus, addItemToMenu, createMenu } from "../redux/actions/menuActions";
-import { getRestaurants } from "../redux/actions/restaurantActions";
+import { getRestaurants, createRestaurantReview } from "../redux/actions/restaurantActions";
 import Fooditem from "./Fooditem";
 import api from "../utils/api";
 
@@ -26,6 +27,11 @@ const Menu = () => {
   const [generatingDishAI, setGeneratingDishAI] = useState(false);
   const [itemToAdd, setItemToAdd] = useState({ category: "", foodItemId: "" });
 
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   const [newFood, setNewFood] = useState({
     name: "",
     price: "",
@@ -38,6 +44,32 @@ const Menu = () => {
     dispatch(getMenus(id));
     dispatch(getRestaurants());
   }, [dispatch, id]);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!rating) {
+      toast.error("Please select a rating", { position: "bottom-right" });
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      const result = await dispatch(
+        createRestaurantReview({ storeId: id, rating, comment })
+      );
+      if (createRestaurantReview.fulfilled.match(result)) {
+        toast.success("Review submitted successfully! ⭐", { position: "bottom-right" });
+        setShowReviewModal(false);
+        setComment("");
+        dispatch(getRestaurants());
+      } else {
+        toast.error(result.payload || "Failed to submit review", { position: "bottom-right" });
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to submit review", { position: "bottom-right" });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const submitMenuCreation = async (e) => {
     e.preventDefault();
@@ -90,15 +122,36 @@ const Menu = () => {
     <div>
       {currentRestaurant && (
         <div className="restaurant-header mb-4 p-4 border rounded bg-white shadow-sm">
-          <h1 className="mb-1">{currentRestaurant.name}</h1>
-          <p className="text-muted mb-2">📍 {currentRestaurant.address}</p>
-          {currentRestaurant.description && (
-            <p className="text-secondary lead mb-0" style={{ fontSize: "1.05rem" }}>
-              {currentRestaurant.description}
-            </p>
-          )}
+          <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+              <h1 className="mb-1">{currentRestaurant.name}</h1>
+              <p className="text-muted mb-2">📍 {currentRestaurant.address}</p>
+              {currentRestaurant.description && (
+                <p className="text-secondary mb-2" style={{ fontSize: "1.05rem" }}>
+                  {currentRestaurant.description}
+                </p>
+              )}
+              <div className="d-flex align-items-center gap-2 mt-2">
+                <span className="badge bg-warning text-dark p-2 fs-6">
+                  ⭐ {(currentRestaurant.ratings || 0).toFixed(1)} / 5
+                </span>
+                <span className="text-muted ms-2">
+                  ({currentRestaurant.numOfReviews || 0} reviews)
+                </span>
+              </div>
+            </div>
+            {isAuthenticated && (
+              <button
+                className="btn btn-warning fw-bold shadow-sm"
+                onClick={() => setShowReviewModal(true)}
+              >
+                ⭐ Rate Restaurant
+              </button>
+            )}
+          </div>
         </div>
       )}
+
 
       {loading ? (
         <p>Loading menus...</p>
@@ -387,6 +440,91 @@ const Menu = () => {
               >
                 Cancel
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Reviews Section */}
+      {currentRestaurant?.reviews && currentRestaurant.reviews.length > 0 && (
+        <div className="reviews-section mt-5 mb-4 p-4 border rounded bg-white shadow-sm">
+          <h3 className="mb-3">Customer Reviews & Ratings ({currentRestaurant.numOfReviews})</h3>
+          <div className="row">
+            {currentRestaurant.reviews.map((rev, index) => (
+              <div key={rev._id || index} className="col-md-6 mb-3">
+                <div className="p-3 border rounded bg-light">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <strong className="text-dark">{rev.name}</strong>
+                    <span className="badge bg-warning text-dark">
+                      ★ {rev.rating} / 5
+                    </span>
+                  </div>
+                  <p className="text-secondary mb-0" style={{ fontSize: "0.95rem" }}>
+                    {rev.comment}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="create-modal">
+          <div className="create-content" style={{ maxWidth: "500px" }}>
+            <h3 className="mb-3">Rate & Review {currentRestaurant?.name}</h3>
+            <form onSubmit={handleReviewSubmit}>
+              <div className="form-group text-center mb-4">
+                <label className="d-block fw-bold mb-2">Select Rating</label>
+                <div className="d-flex justify-content-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      style={{
+                        fontSize: "2.5rem",
+                        cursor: "pointer",
+                        color: star <= rating ? "#ffc107" : "#e4e5e9",
+                        transition: "color 0.2s",
+                        userSelect: "none",
+                      }}
+                      onClick={() => setRating(star)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <small className="text-muted mt-1 d-block">{rating} out of 5 stars</small>
+              </div>
+
+              <div className="form-group mb-3">
+                <label className="fw-bold">Your Review / Comment</label>
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  placeholder="Share your dining experience..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowReviewModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary ml-2"
+                  disabled={submittingReview}
+                >
+                  {submittingReview ? "Submitting..." : "Submit Review"}
+                </button>
+              </div>
             </form>
           </div>
         </div>

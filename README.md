@@ -1,215 +1,164 @@
-# 🍔 Food Order App (Full Stack)
+# 🍕 OrderIt - Full Stack Food Delivery & Restaurant Platform with AI & Stripe
 
-A modern full-stack Food Ordering Web Application where users can explore food items, add them to cart, and place orders easily. This project is designed to simulate real-world platforms like Swiggy/Zomato.
-
----
-
-## 🚀 Live Status
-
-🚧 Currently in Development (Backend Initialized)
+OrderIt is a feature-rich, scalable MERN stack web application built for seamless food ordering and multi-restaurant management. It features **AI-powered copywriting & review sentiment analysis**, **Stripe Checkout Payment Gateway integration**, and **real-time admin management tools**.
 
 ---
 
-## ✨ Features
+## ✨ Key Features & Capabilities
 
-### 👤 User Features
+### 🤖 1. AI-Powered Intelligence (Groq Llama-3.1 & Dynamic Engine)
+- **✨ AI Restaurant Description Generator**: Generates catchy, creative restaurant descriptions strictly under 200 characters with a live remaining character indicator (`(200 left)`).
+- **✨ AI Dish Description Generator**: Generates appetizing food item descriptions strictly under 150 characters with live character countdown (`(150 left)`).
+- **📊 AI Customer Review Analyzer**: Automatically evaluates restaurant reviews, generating sentiment scores, bulleted key takeaways, and top mentioned dishes.
+- **⚡ Smart Dynamic Copywriting Fallback**: Includes a built-in category-aware copywriting engine that guarantees unique, high-variety fallback descriptions if API keys are absent or offline.
 
-* 🔐 User Authentication (Signup/Login with JWT)
-* 🍽️ Browse Food Items
-* 🛒 Add to Cart
-* 📦 Place Orders
-* 📜 View Order History
+### 💳 2. Stripe Payment Gateway Integration
+- **Stripe Checkout Session**: Complete cart checkout with line item calculation, shipping options, and INR currency support.
+- **Dynamic Origin Redirects**: Uses dynamic origin resolution (`req.headers.origin`) ensuring users seamlessly return to the active frontend domain/port (`/success?session_id=...`).
+- **Duplicate Prevention & Verification**: Verifies Stripe session `payment_status` before creating order records in MongoDB.
 
-### 🛠️ Admin Features (Planned)
+### 👑 3. Admin & Restaurant Owner Dashboard
+- **Restaurant Management**:
+  - **Create Restaurant**: Add new restaurants with name, address, description (manual or AI-generated), pure veg toggle, geo-coordinates, and custom images.
+  - **Edit Restaurant**: Modify all restaurant details dynamically without page reloads.
+  - **Delete Restaurant**: Easily remove restaurants from the platform.
+- **Multi-Category Menu Management**:
+  - Add multiple menu categories (*Starters, Main Course, Beverages, Pastries, etc.*) per restaurant.
+  - Delete individual menu categories without affecting other menu groups.
+- **Food Item Management**:
+  - **Create Food Item**: Add items under specific menu categories with price, stock, description (with AI generator), and image URL.
+  - **Edit Food Item**: Update name, price, description, stock, and images anytime with live auto-refresh.
+  - **Delete Food Item**: Remove individual food items safely.
 
-* ➕ Add Food Items
-* ✏️ Edit Food Items
-* ❌ Delete Food Items
-* 📊 Admin Dashboard
-* 📦 Order Management
+### 👤 4. Customer Features & UX
+- **Explore & Search**: Search restaurants by keyword, filter 100% Pure Veg options, and sort by ratings or review counts.
+- **Cart Management**: Real-time stock validation, quantity adjusters, and cart summary calculations.
+- **Header Navigation**: Quick **Home** navigation link in both top header bar and user profile dropdown menu for effortless navigation from any screen.
+- **User Profile & Order History**: Update avatar images (Cloudinary integration), track order status, and review past orders.
+- **Smart Toast Alerts**: Clean single-instance notifications (`ToastContainer limit={1}`) with deduplication to prevent stacked warning messages.
 
 ---
 
-## 🧠 Tech Stack
+## 🛠️ Tech Stack
 
-### 💻 Frontend (Planned)
-
-* Next.js
-* Tailwind CSS
-* Axios
+### 💻 Frontend
+- **Framework & Build**: React 18, Vite
+- **State Management**: Redux Toolkit (Slices & Async Thunks)
+- **Routing**: React Router v6
+- **UI & Icons**: Bootstrap 5, FontAwesome, CSS3
+- **Notifications**: React Toastify
 
 ### ⚙️ Backend
+- **Runtime**: Node.js, Express.js (CommonJS)
+- **Database**: MongoDB Atlas with Mongoose ORM
+- **Authentication**: JWT (JSON Web Tokens) with HTTP-Only Cookies & Bearer Tokens, Bcrypt.js
+- **Media Storage**: Cloudinary SDK
 
-* Node.js
-* Express.js
-
-### 🗄️ Database
-
-* MongoDB (Atlas)
-
-### 🔐 Authentication
-
-* JWT (JSON Web Token)
-* Bcrypt.js
+### 🔌 Third-Party APIs
+- **AI Models**: Groq API (`llama-3.1-8b-instant`)
+- **Payments**: Stripe Node SDK (`stripe checkout.sessions`)
 
 ---
 
-## 📁 Folder Structure
+## 📁 Project Structure
 
 ```
-food_order/
-│
+Food_Order_Project/
 ├── backend/
-│   ├── models/
-│   │   ├── User.js
-│   │   ├── Food.js
-│   │   ├── Order.js
-│   │
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── foodRoutes.js
-│   │   ├── orderRoutes.js
-│   │
-│   ├── controllers/
-│   ├── middleware/
-│   └── server.js
+│   ├── config/             # Config files (config.env, cloudinary.js)
+│   ├── controllers/        # Route controllers (auth, restaurant, menu, foodItem, order, payment, ai)
+│   ├── middlewares/        # Auth, Role Authorization, CatchAsync, ErrorHandler
+│   ├── models/             # Mongoose Schemas (user, restaurant, menu, foodItem, order, cartModel)
+│   ├── routes/             # Express Route definitions (/api/v1/*)
+│   ├── services/           # External Services (ai.service.js, aiReviewAnalyzer.js)
+│   ├── utils/              # Utility functions & Database Seeders
+│   ├── app.js              # Express app setup & middleware mounting
+│   └── server.js           # Server startup script
 │
-├── frontend/ (Coming Soon)
-│
-└── README.md
+├── frontend/
+│   ├── src/
+│   │   ├── Components/     # React Components (Home, Restaurant, Menu, Fooditem, Cart, Admin, User)
+│   │   ├── redux/          # Redux Toolkit Store, Slices & Async Actions
+│   │   ├── utils/          # Axios API Instance (api.js)
+│   │   ├── App.jsx         # App routes & main layout
+│   │   └── main.jsx        # App entrypoint
+│   └── vite.config.js      # Vite build & proxy settings
 ```
 
 ---
 
-## ⚙️ Installation & Setup Guide
+## ⚙️ Setup & Installation
 
 ### 1️⃣ Clone Repository
-
 ```bash
 git clone https://github.com/vaibhavpal7549/food_order.git
 cd food_order
 ```
 
----
-
-### 2️⃣ Setup Backend
-
+### 2️⃣ Backend Setup
 ```bash
 cd backend
 npm install
 ```
 
----
-
-### 3️⃣ Create Environment File (.env)
-
-Create a `.env` file inside the backend folder and add:
-
+Create `backend/config/config.env` with your credentials:
 ```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-PORT=5000
+PORT=8000
+NODE_ENV=development
+DB_LOCAL_URI=mongodb://127.0.0.1:27017/food_order
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_TIME=7d
+COOKIE_EXPIRES_TIME=7
+FRONTEND_URL=http://localhost:5173
+
+# Stripe Credentials
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_API_KEY=pk_test_...
+
+# Cloudinary Credentials
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# AI Engine Credentials
+GROQ_API_KEY=gsk_...
 ```
 
----
-
-### 4️⃣ Run Backend Server
-
+Run Backend Dev Server:
 ```bash
-npm start
+npm run dev
 ```
 
-Server will run on:
-http://localhost:8000
+### 3️⃣ Frontend Setup
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
 
 ---
 
-## 🔗 API Endpoints
+## 🔗 Key API Routes (`/api/v1/*`)
 
-### 🔐 Authentication APIs
-
-* POST `/api/auth/register` → Register User
-* POST `/api/auth/login` → Login User
-
-### 🍔 Food APIs
-
-* GET `/api/food` → Get all food items
-* POST `/api/food` → Add food item (Admin)
-
-### 📦 Order APIs
-
-* POST `/api/order` → Place order
-* GET `/api/order/user` → Get user orders
-
----
-
-## 🔄 Workflow
-
-1. User registers/logins
-2. User browses food items
-3. Adds items to cart
-4. Places order
-5. Order stored in database
-
----
-
-## 🚧 Future Enhancements
-
-* 💳 Payment Integration (Razorpay / Stripe)
-* 📡 Real-time Order Tracking (Socket.IO)
-* ⭐ Ratings & Reviews System
-* 📱 Fully Responsive UI
-* 🔔 Notifications (Email/SMS)
-* 🌐 Multi-vendor support
-* 🤖 AI-based Food Recommendation System
-
----
-
-## 🌍 Deployment Plan
-
-Frontend → Vercel
-Backend → Render / Railway
-Database → MongoDB Atlas
-
----
-
-## 🛡️ Security Features
-
-* Password Hashing using Bcrypt
-* JWT-based Authentication
-* Protected Routes (Middleware)
-* Environment Variables for sensitive data
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-Steps:
-
-1. Fork the repo
-2. Create a new branch
-3. Make changes
-4. Submit a Pull Request
+| Endpoint | Method | Description | Access |
+|---|---|---|---|
+| `/api/v1/users/login` | POST | User Login | Public |
+| `/api/v1/users/signup` | POST | User Signup | Public |
+| `/api/v1/eats/stores` | GET | Get All Restaurants | Public |
+| `/api/v1/eats/stores` | POST | Create New Restaurant | Admin |
+| `/api/v1/eats/stores/:storeId` | PATCH | Edit Restaurant Details | Admin |
+| `/api/v1/eats/stores/:storeId/menus` | GET | Get Restaurant Menus | Public |
+| `/api/v1/eats/stores/:storeId/menus` | POST | Add Menu Category | Admin |
+| `/api/v1/eats/item` | POST | Create Food Item | Admin |
+| `/api/v1/eats/item/:foodId` | PATCH | Edit Food Item Details | Admin |
+| `/api/v1/payment/process` | POST | Initiate Stripe Checkout | Authenticated |
+| `/api/v1/ai/generate-restaurant-ai` | POST | Generate AI Restaurant Description | Admin |
+| `/api/v1/ai/generate-food-ai` | POST | Generate AI Dish Description | Admin |
+| `/api/v1/ai/admin/restaurants/:id/analyze` | PUT | Analyze Customer Reviews with AI | Admin |
 
 ---
 
 ## 👨‍💻 Author
 
-Vaibhav Pal
-
-GitHub: https://github.com/vaibhavpal7549
-LinkedIn: https://linkedin.com/in/vaibhavpal7549
-
----
-
-## ⭐ Support
-
-If you like this project, give it a ⭐ on GitHub!
-
----
-
-## 📌 Note
-
-This project is being built as a real-world scalable application and will be continuously improved with advanced features.
+**Vaibhav Pal**
+- **GitHub**: [vaibhavpal7549](https://github.com/vaibhavpal7549)
