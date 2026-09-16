@@ -2,7 +2,7 @@
 import axios from 'axios';
 import qs from 'qs';
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || '/api', // Base URL for all API requests
+    baseURL: '/api', // Base URL for all API requests
     withCredentials: true, // Include cookies in requests
     paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' }), // Serialize query parameters
     headers: {
