@@ -8,17 +8,15 @@ const Restaurant = require("../models/restaurant");
 exports.generateFoodAI = catchAsyncErrors(async (req, res, next) => {
   const { name, category, spiceLevel, price } = req.body;
 
-  if (!name || !category || !spiceLevel || price === undefined) {
-    return next(
-      new ErrorHandler("name, category, spiceLevel and price are required", 400)
-    );
+  if (!name || !name.trim()) {
+    return next(new ErrorHandler("Dish name is required for AI generation", 400));
   }
 
   const aiData = await aiService.generateDishDescription({
-    name,
-    category,
-    spiceLevel,
-    price,
+    name: name.trim(),
+    category: category || "General",
+    spiceLevel: spiceLevel || "Medium",
+    price: price || 0,
   });
 
   return res.status(200).json({

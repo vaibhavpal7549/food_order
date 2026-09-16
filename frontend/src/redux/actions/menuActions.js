@@ -6,12 +6,34 @@ export const getMenus = createAsyncThunk(
     async (storeId, { rejectWithValue }) => {
         try {
             const { data } = await api.get(`/v1/eats/stores/${storeId}/menus`);
-            const menuDocument = data.data?.[0] || null;
-            const menuGroups = menuDocument?.menu || [];
+            const docs = data.data || [];
+            const menuDocument = docs[0] || null;
+
+            let allGroups = [];
+            docs.forEach((doc) => {
+                if (doc?.menu && Array.isArray(doc.menu)) {
+                    doc.menu.forEach((group) => {
+                        const existing = allGroups.find((g) => g.category === group.category);
+                        if (existing) {
+                            group.items?.forEach((item) => {
+                                const itemId = item._id || item;
+                                if (!existing.items.some((it) => (it._id || it) === itemId)) {
+                                    existing.items.push(item);
+                                }
+                            });
+                        } else {
+                            allGroups.push({
+                                category: group.category,
+                                items: [...(group.items || [])],
+                            });
+                        }
+                    });
+                }
+            });
 
             return {
                 menuDocumentId: menuDocument?._id || null,
-                menus: menuGroups.map((group, index) => ({
+                menus: allGroups.map((group, index) => ({
                     _id: `${group.category || 'category'}-${index}`,
                     category: group.category || 'Uncategorized',
                     items: group.items || [],

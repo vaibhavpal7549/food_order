@@ -23,6 +23,7 @@ const Menu = () => {
   const [showMenuCreate, setShowMenuCreate] = useState(false);
   const [newMenuCategory, setNewMenuCategory] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [generatingDishAI, setGeneratingDishAI] = useState(false);
   const [itemToAdd, setItemToAdd] = useState({ category: "", foodItemId: "" });
 
   const [newFood, setNewFood] = useState({
@@ -106,15 +107,15 @@ const Menu = () => {
       ) : menus && menus.length > 0 ? (
         menus.map((menu) => {
           const deleteMenu = async () => {
-            if (!window.confirm("Delete this menu category?")) return;
+            if (!window.confirm(`Delete "${menu.category}" category?`)) return;
             try {
               await api.delete(
-                `/v1/eats/stores/${id}/menus/${menuDocumentId}`
+                `/v1/eats/stores/${id}/menus/${menuDocumentId}?category=${encodeURIComponent(menu.category)}`
               );
               dispatch(getMenus(id));
             } catch (err) {
               console.error(err);
-              alert(err.response?.data?.message || "Unable to delete menu");
+              alert(err.response?.data?.message || "Unable to delete menu category");
             }
           };
 
@@ -294,48 +295,62 @@ const Menu = () => {
                 />
               </div>
 
-              <div className="form-group d-flex align-items-center">
-                <input
-                  type="text"
-                  placeholder="Description"
+              <div className="form-group mb-2">
+                <div className="d-flex align-items-center justify-content-between mb-1">
+                  <small className={150 - (newFood.description?.length || 0) <= 15 ? "text-danger fw-bold" : "text-muted"} style={{ fontSize: "12px" }}>
+                    Description ({150 - (newFood.description?.length || 0)} left)
+                  </small>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-success"
+                    style={{ fontSize: "12px", padding: "2px 8px" }}
+                    disabled={generatingDishAI}
+                    onClick={async () => {
+                      if (!newFood.name || !newFood.name.trim()) return alert("Please enter dish name first!");
+
+                      try {
+                        setGeneratingDishAI(true);
+                        const { data } = await api.post(
+                          "/v1/ai/generate-food-ai",
+                          {
+                            name: newFood.name,
+                            category: itemToAdd.category || "General",
+                            spiceLevel: "Medium",
+                            price: parseFloat(newFood.price) || 0,
+                          }
+                        );
+
+                        if (data?.data?.description) {
+                          setNewFood((prev) => ({
+                            ...prev,
+                            description: data.data.description.slice(0, 150),
+                          }));
+                        }
+                      } catch (err) {
+                        console.error("AI Generation error:", err);
+                        alert(err.response?.data?.message || "Could not generate AI description. You can type it manually!");
+                      } finally {
+                        setGeneratingDishAI(false);
+                      }
+                    }}
+                  >
+                    {generatingDishAI ? "Generating..." : "✨ Generate AI"}
+                  </button>
+                </div>
+                <textarea
+                  className="form-control"
+                  rows="2"
+                  placeholder="Enter dish description (max 150 chars)"
                   value={newFood.description}
+                  maxLength={150}
                   onChange={(e) =>
                     setNewFood({
                       ...newFood,
-                      description: e.target.value,
+                      description: e.target.value.slice(0, 150),
                     })
                   }
                   required
                 />
-
-                <button
-                  type="button"
-                  className="btn btn-sm btn-info ml-2"
-                  onClick={async () => {
-                    if (!newFood.name) return alert("Enter name first");
-
-                    try {
-                      const { data } = await api.post(
-                        "/v1/ai/generate-food-ai",
-                        {
-                          name: newFood.name,
-                          category: itemToAdd.category || "",
-                          spiceLevel: "Medium",
-                          price: newFood.price || 0,
-                        }
-                      );
-
-                      setNewFood({
-                        ...newFood,
-                        description: data.data.description,
-                      });
-                    } catch (err) {
-                      console.error(err);
-                    }
-                  }}
-                >
-                  AI desc
-                </button>
               </div>
 
               <div className="form-group">

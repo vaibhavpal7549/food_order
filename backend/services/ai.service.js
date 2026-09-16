@@ -6,53 +6,97 @@ exports.generateDishDescription = async ({
   spiceLevel,
   price,
 }) => {
+  const ensureUnder150 = (str) => {
+    if (!str) return "";
+    let text = str.trim().replace(/\s+/g, " ");
+    if (text.length <= 150) return text;
+    let truncated = text.substring(0, 146);
+    const lastSpace = truncated.lastIndexOf(" ");
+    if (lastSpace > 90) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+    return truncated + "...";
+  };
+
   const prompt = `
-You are a professional food classification assistant.
-
-Generate ONLY valid JSON.
-No markdown.
-No explanation text.
-
-IMPORTANT RULES:
-- Tags must be accurate restaurant-style tags
-- Do NOT misclassify dishes
-- Do NOT label main courses as desserts
-- Allergens must be realistic
-- Serves must be realistic (1 or 2)
-- bestFor must be meal timings only
+You are a professional culinary assistant.
+Generate a mouth-watering dish description for:
 
 Dish Name: ${name}
-Category: ${category}
-Spice Level: ${spiceLevel}
-Base Price: ${price}
+Category: ${category || "General"}
+Spice Level: ${spiceLevel || "Medium"}
+Base Price: ${price || 0}
 
-Return JSON in this EXACT format:
+STRICT RULES:
+1. MAX 150 CHARACTERS TOTAL. Must be appetizing and strictly under 150 characters.
+2. Return ONLY valid JSON in this format:
 {
   "description": "string",
   "tags": ["string"],
   "allergens": ["string"],
-  "serves": "string",
-  "bestFor": ["string"]
+  "serves": "1",
+  "bestFor": ["Lunch", "Dinner"]
 }
 `;
 
-  const response = await axios.post(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      model: "llama-3.1-8b-instant",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.4,
-      max_tokens: 300,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  try {
+    if (process.env.GROQ_API_KEY) {
+      const response = await axios.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          model: "llama-3.1-8b-instant",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.8,
+          max_tokens: 200,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-  return JSON.parse(response.data.choices[0].message.content);
+      const cleaned = response.data.choices[0].message.content.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleaned);
+      if (parsed?.description) {
+        parsed.description = ensureUnder150(parsed.description);
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn("Dish AI API call failed, using dynamic generator:", err.message);
+  }
+
+  // Dynamic Fallback Generator for Dishes (Guaranteed <= 150 chars)
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const dName = name?.trim() || "Special Dish";
+
+  const openers = [
+    `Delicious ${dName},`,
+    `Freshly prepared ${dName},`,
+    `Mouth-watering ${dName},`,
+    `Authentic ${dName},`,
+    `Savor our chef-special ${dName},`,
+  ];
+
+  const highlights = [
+    `cooked with aromatic herbs & rich spices to perfection.`,
+    `served hot with signature seasonings and authentic flavors.`,
+    `crafted with fresh ingredients for a delightful taste experience.`,
+    `prepared fresh with rich traditional spices for every food craving.`,
+    `blended with natural spices for a memorable and savory bite.`,
+  ];
+
+  const generatedDesc = `${pick(openers)} ${pick(highlights)}`;
+
+  return {
+    description: ensureUnder150(generatedDesc),
+    tags: [category || "Specialty", "Fresh"],
+    allergens: ["None"],
+    serves: "1-2",
+    bestFor: ["Lunch", "Dinner"],
+  };
 };
 
 exports.generateRestaurantDescription = async ({ name, address, isVeg }) => {
@@ -187,4 +231,6 @@ STRICT RULES:
   const generatedText = `${pick(openers)} ${pick(bodyOptions)} ${pick(closers)}`;
   return { description: ensureUnder200(generatedText) };
 };
+
+
 
