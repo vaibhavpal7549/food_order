@@ -44,7 +44,13 @@ app.use("/api/v1/users", auth);
 app.use("/api/v1", payment);
 app.use("/api/v1/eats/cart", cart);
 app.use("/api/v1/eats/restaurants", restaurantCount);
-app.use("/api/v1/ai", aiRouter);
+// Root health check route
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Food Order API Backend is running successfully! 🚀",
+  });
+});
 
 // 404 handler
 app.all("*", (req, res) => {

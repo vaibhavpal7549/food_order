@@ -73,9 +73,14 @@ Under the **Environment** tab on Render, add the following variables:
    - **Root Directory**: Click *Edit* and select `frontend`.
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
+   - **Install Command** (Optional): If peer dependency warnings occur, set to `npm install --legacy-peer-deps` (or rely on `frontend/.npmrc`).
 
-### Step 2.2: Add Single Page App (SPA) Rewrite Rule
-Create `frontend/vercel.json` to handle client-side routing (`react-router-dom`):
+### Step 2.2: Peer Dependency & SPA Configuration
+Ensure `frontend/.npmrc` contains:
+```ini
+legacy-peer-deps=true
+```
+And `frontend/vercel.json` contains SPA routing rules:
 
 ```json
 {
