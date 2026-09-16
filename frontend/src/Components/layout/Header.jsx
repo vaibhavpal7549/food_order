@@ -54,10 +54,14 @@ const Header = () => {
         </div>
 
         {/* right side */}
-        <div className="col-12 col-md-3 mt-4 mt-md-0 text-center">
+        <div className="col-12 col-md-3 mt-4 mt-md-0 text-center d-flex align-items-center justify-content-center justify-content-md-end">
+          <Link to="/" className="btn text-white mr-2" style={{ textDecoration: "none", fontWeight: "600", fontSize: "1.05rem" }}>
+            Home
+          </Link>
+
           {(!user || (user.role !== "admin" && user.role !== "restaurant-owner")) && (
             <Link to="/cart" style={{ textDecoration: "none" }}>
-              <span className="ml-3" id="cart">
+              <span className="ml-2" id="cart">
                 Cart
               </span>
               <span className="ml-1" id="cart_count">
@@ -68,13 +72,13 @@ const Header = () => {
 
           {user ? (
             <div
-              className="ml-4 dropdown d-inline"
+              className="ml-3 dropdown d-inline"
               ref={dropdownRef}
               style={{ position: "relative" }}
             >
               <button
                 type="button"
-                className="btn text-white mr-4"
+                className="btn text-white mr-2"
                 onClick={() => setDropdownOpen((prev) => !prev)}
                 aria-haspopup="true"
                 aria-expanded={dropdownOpen}
@@ -102,6 +106,14 @@ const Header = () => {
                     minWidth: "10rem",
                   }}
                 >
+                  <Link
+                    className="dropdown-item"
+                    to="/"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Home
+                  </Link>
+
                   {(user?.role === "admin" || user?.role === "restaurant-owner") ? (
                     <Link
                       className="dropdown-item"

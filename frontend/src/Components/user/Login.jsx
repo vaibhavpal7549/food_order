@@ -21,7 +21,7 @@ const Login = () => {
   // FIX BUG-20: Show login errors via toast and clear them after display
   useEffect(() => {
     if (error) {
-      toast.error(error, { position: "bottom-right" });
+      toast.error(error, { toastId: error, position: "bottom-right" });
       dispatch(clearErrors());
     }
   }, [error, dispatch]);

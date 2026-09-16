@@ -30,7 +30,7 @@ function App() {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer limit={1} autoClose={3000} position="bottom-right" />
       <Router>
         <div className="App d-flex flex-column min-vh-100">
           <Header />

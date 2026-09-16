@@ -32,11 +32,11 @@ const userSlice = createSlice({
       state.error = action.payload;
     },
     //load user fail reducer
-    loadUserFail: (state, action) => {
+    loadUserFail: (state) => {
       state.loading = false;
       state.isAuthenticated = false;
       state.user = null;
-      state.error = action.payload;
+      state.error = null;
     },
 
     //logout success reducer
