@@ -47,27 +47,36 @@ exports.newOrder = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Cart is empty or invalid", 400));
   }
 
-  if (!session.shipping_details?.address || !session.customer_details?.phone) {
-    return next(new ErrorHandler("Shipping or phone details missing from checkout session", 400));
-  }
+  const shippingAddr =
+    session.shipping_details?.address ||
+    session.customer_details?.address ||
+    {};
+
+  const line1 = shippingAddr.line1 || "";
+  const line2 = shippingAddr.line2 || "";
+  const fullAddress =
+    (line1 + " " + line2).trim() || req.user?.address || "Address provided at checkout";
 
   let deliveryInfo = {
-    address:
-      session.shipping_details.address.line1 +
-      " " +
-      (session.shipping_details.address.line2 || ""),
-    city: session.shipping_details.address.city,
-    phoneNo: session.customer_details.phone,
-    postalCode: session.shipping_details.address.postal_code,
-    country: session.shipping_details.address.country,
+    address: fullAddress,
+    city: shippingAddr.city || "N/A",
+    phoneNo:
+      session.customer_details?.phone ||
+      session.shipping_details?.phone ||
+      req.user?.phoneNo ||
+      "N/A",
+    postalCode: shippingAddr.postal_code || "000000",
+    country: shippingAddr.country || "IN",
   };
+
   let orderItems = cart.items.map((item) => ({
-    name: item.foodItem.name,
+    name: item.foodItem?.name || "Food Item",
     quantity: item.quantity,
-    image: item.foodItem.images?.[0]?.url || "",
-    price: item.foodItem.price,
-    fooditem: item.foodItem._id,
+    image: item.foodItem?.images?.[0]?.url || "",
+    price: item.foodItem?.price || 0,
+    fooditem: item.foodItem?._id || item.foodItem,
   }));
+
 
   let paymentInfo = {
     id: session.payment_intent,
