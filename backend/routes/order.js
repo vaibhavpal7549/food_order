@@ -16,7 +16,7 @@ router.route("/new").post(authController.protect, newOrder);
 // IMPORTANT: /me/myOrders must come BEFORE /:id to prevent Express
 // matching "me" as a dynamic :id parameter (which causes CastError).
 router.route("/me/myOrders").get(authController.protect, myOrders);
-router.route("/admin/orders").get(authController.protect, authorizeRoles("admin"), allOrders);
+router.route("/admin/orders").get(authController.protect, authorizeRoles("admin", "restaurant-owner"), allOrders);
 router.route("/:id").get(authController.protect, getSingleOrder);
 
 module.exports = router;

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { getRestaurants } from "../../redux/actions/restaurantActions";
-import { myOrders } from "../../redux/actions/orderActions";
+import { getAllOrdersAdmin, myOrders } from "../../redux/actions/orderActions";
 import Loader from "../layout/Loader";
 import "./Dashboard.css";
 
@@ -20,15 +20,20 @@ const Dashboard = () => {
       return;
     }
     dispatch(getRestaurants());
-    dispatch(myOrders());
-  }, [dispatch, isAuthenticated, navigate]);
+    if (user?.role === "admin" || user?.role === "restaurant-owner") {
+      dispatch(getAllOrdersAdmin());
+    } else {
+      dispatch(myOrders());
+    }
+  }, [dispatch, isAuthenticated, user, navigate]);
 
   // Calculate stats
   const totalRestaurants = restaurants?.length || 0;
   const totalOrders = orders?.length || 0;
   const totalRevenue = orders?.reduce((sum, o) => sum + (o.finalTotal || 0), 0) || 0;
-  const deliveredOrders = orders?.filter((o) => o.orderStatus === "Delivered")?.length || 0;
+  const deliveredOrders = orders?.filter((o) => o.orderStatus?.toLowerCase() === "delivered")?.length || 0;
   const pendingOrders = totalOrders - deliveredOrders;
+
 
   if (ordersLoading) return <Loader />;
 

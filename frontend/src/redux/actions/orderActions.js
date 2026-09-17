@@ -88,3 +88,17 @@ export const getOrderDetails = (id) => async (dispatch) => {
     dispatch(orderDetailsFail(getErrorMessage(error)));
   }
 };
+
+// get all orders - ADMIN
+export const getAllOrdersAdmin = () => async (dispatch) => {
+  try {
+    dispatch(myOrdersRequest());
+
+    const { data } = await api.get("/v1/eats/orders/admin/orders");
+
+    dispatch(myOrdersSuccess(data.orders));
+  } catch (error) {
+    dispatch(myOrdersFail(getErrorMessage(error)));
+  }
+};
+
